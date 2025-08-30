@@ -1,0 +1,4 @@
+# Python 3.8+ required
+click==8.2.2
+structlog==24.1.0
+tqdm==4.67.1

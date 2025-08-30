@@ -1,0 +1,57 @@
+# Byte-compiled
+*.py[cod]
+__pycache__/
+
+# C extensions (if any)
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+#  * https://pyinstaller.readthedocs.io/en/latest/feature.html#cmdoption-onefile
+*.onefile~
+
+# Distribution
+*.egg
+
+# Virtual environments
+venv/
+env/
+.venv/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# System files
+*~
+*.tmp
+*.log
+
+# Test files (if any)
+test/*.pyc
+test/__pycache__/
+
+# Environment configs (if created)
+.env.local
+.env*
+*.env.local
+.env.*.local
+
+# IDE-specific files (if generated)
+*.pyc
+*.pyo
+*.pyd
+.Python
