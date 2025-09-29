@@ -10,10 +10,10 @@ if progress:
     except ImportError as imp_err:
         logger.error("tqdm is required for progress reporting.", error=str(imp_err))
         sys.exit(1)
-    file_iter = tqdm(mkv_files, desc="Converting files", unit="file", ncols=80)
+    file_iter = tqdm(mkv_files, desc="Converting files", unit="file", ncols=80, total=len(mkv_files))
 else:
     file_iter = mkv_files
-```
+````
 
 ## 2. Enhancement Requirements
 
@@ -66,10 +66,11 @@ file_iter = tqdm(
     desc="Converting files",
     unit="file",
     ncols=80,
-    total=len(mkv_files)
+    total=len(mkv_files),
+    postfix={"percent": "0.0%", "remaining_time": "--:--:--"}
 )
 ```
-
+Use tqdm's built-in capabilities for percentage tracking and estimated time remaining through the `set_postfix` method.
 ### API Documentation for Key PySide6 Components
 - **QApplication**: Core application class for managing the application's event loop
 - **QMainWindow**: Main window widget for the standalone progress window
