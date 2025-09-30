@@ -1,61 +1,35 @@
-# AGENTS.md – Build / Lint / Test commands and style guidelines
+# AGENTS.md – Agent Workflow, Build, Lint, Test, and Style Guide
 
-## Build
-- Run the CLI with Python: `python mkv_mp4_bulk_converter.py <input_folder>`
-- Python >=3.8 required; install deps with `pip install -r requirements.txt`
+## Build & Environment
+- Python 3.8+ required; install deps: `pip install -r requirements.txt`
+- Run CLI: `python mkv_mp4_bulk_converter.py <input_folder>`
+- Use virtualenv: `python -m venv .venv`
 
-## Lint
-- Run flake8 against project folder: `flake8 .`
-- Run black for formatting: `black .`
+## Lint & Format
+- Lint: `flake8 .`
+- Format: `black .`
 
 ## Test
-- Run all tests: `pytest -q`
-- Run a single test: `pytest -q <test_file>::<test_name>`
-- Run with coverage: `pytest -q --cov=mkv_mp4_bulk_converter.py`
+- Run all: `pytest -q`
+- Run file: `pytest -q test/test_mkv_mp4_bulkConverter.py`
+- Run single test: `pytest -q test/test_mkv_mp4_bulkConverter.py::test_conversion_complete`
+- Coverage: `pytest -q --cov=mkv_mp4_bulk_converter.py`
 
 ## Code Style
-- Imports: absolute, standard libs first, third-party, local modules – sorted, no unused imports
-- Formatting: 4-space indent, max line length 88, end-of-file newline
-- Typing: use type hints (`list[str]`, `int`, etc.) and `my_type: type | None`
-- Naming: snake_case for functions & variables, UpperCamelCase for classes, CONSTANTS in UPPER_SNAKE
-- Error handling: explicit ValueError on bad inputs, use `try / except` for external calls, log via structlog, never swallow exceptions silently
+- Imports: absolute, stdlib first, then third-party, then local; sorted, no unused
+- Formatting: 4-space indent, max line 88, EOF newline
+- Typing: use type hints everywhere (`list[str]`, `int`, etc.)
+- Naming: snake_case (funcs/vars), UpperCamelCase (classes), UPPER_SNAKE (constants)
+- Error handling: raise ValueError for bad input, use try/except for external calls, log via structlog, never swallow exceptions
 - Logging: redact sensitive keys (`password`, `api_key`, `token`) using `redact_sensitive_fields`
-- Documentation: docstrings per PEP 257, explain arguments, raises, returns; tests act as usage examples
+- Docstrings: PEP 257, explain args/raises/returns; tests act as usage examples
 
-## Testing Commands
-- Run a specific test file: `pytest -q test_mkv_mp4_bulkConverter.py`
-- Run a specific test: `pytest -q test_mkv_mp4_bulkConverter.py::test_conversion_complete`
-
-## Environment
-- Python >=3.8
-- Virtual environment recommended: `python -m venv .venv` and `pip install -r requirements.txt`
-- Use `pytest -q` to run tests quickly
-- Run `flake8 . && black .` before pushing to ensure code quality and consistency
-- Always ensure sensitive data is redacted in logs
-
-## Rules
-- No direct git commits; use `git add` and `git commit` with proper messages
-- No test files are run without test coverage
-- No code changes without proper type hints and documentation
-- No untested code in pull requests
-- No sensitive keys in logs; use `redact_sensitive_fields` for all logging
-
-## Agent Guidelines
-- Always check linting and formatting before committing
-- Never commit without a test or test coverage
-- Use `pytest -q <test_file>::<test_name>` to debug specific test issues
-- Ensure all code changes follow the documented style rules
-- Prefer `git add` and `git commit` for changes, not `git add .`
+## Agent Rules
+- Always lint & format before commit
+- Never commit untested code; always add/maintain tests
+- Use `pytest -q <file>::<test>` to debug
 - Only commit when all linting and tests pass
-- Always write docstrings and type hints for new code
-- Redact sensitive information before logging
-- Use `pytest` with `-q` for fast feedback and `--cov` for coverage
+- Redact sensitive info in logs
 
-## Context7 MCP Tool Usage
-- Use the `context7_get_library_docs` tool when researching any library documentation
-- First resolve the library ID with `context7_resolve_library_id` before fetching docs
-- Use `context7_get_library_docs` for: documentation queries, API examples, and code snippets
-- Example: `context7_get_library_docs context7CompatibleLibraryID="..."`
-
-## Pro Tip
-Use `pytest -q` to test specific files or tests, e.g. `pytest -q test_mkv_mp4_bulkConverter.py::test_conversion_complete` to speed up debugging and development.
+## Library Docs
+- Use `context7_get_library_docs` for up-to-date docs; resolve ID first
