@@ -265,3 +265,12 @@ def main(
 
 3.  **Verify:**
     The progress window should update in real-time as the conversion script processes the files.
+
+#### Specific Test Case
+
+To ensure robust handling of paths with spaces and special characters, test with the following specific folder path:
+
+```bash
+python mkv_mp4_bulk_converter.py "D:\Library\JellyFin\Films\The Fantastic 4 - First Steps (2025)" --progress-window
+```
+**Expected Outcome:** The script should correctly identify and convert video files within this directory without errors related to the path.
