@@ -148,3 +148,7 @@ This guide provides a step-by-step checklist for implementing the FFMPEG Bulk Co
     - [ ] **Implement Dynamic Window Resizing:**
         - [ ] **GUI (`converter_app.py`):** Configure the main window to support dynamic resizing.
         - [ ] **Layout Management:** Ensure the log/status area expands primarily, with the control/options panel adjusting proportionally to maintain a balanced appearance.
+    - [ ] **Element Behavior:**
+        - [ ] **Auto-Scroll on Log Window:** As logs fill up the log output window it should automatically scroll to keep the latest logs visible. Ensure the log window can be easily scrolled up and down        
+        - [ ] **Standardized Log Structure/Formatting:** Standardized the log string outputs such that there is consistence spacing between key aspects of each log event (timestamp, message, etc). This should greatly improve the ease at which user's can parse the log messages
+        - [ ] **Color Coded Logs to Enhance Ease of Parsing Logs:** Standardize the log string output colorings based on the aspect of the log message (timestamp, message, etc) as well as the message type (error, info, warning, success, etc) 
