@@ -78,7 +78,19 @@ This guide provides a step-by-step checklist for implementing the FFMPEG Bulk Co
     - [x] If enabled, use `os.remove()` to delete the original input file.
     - [x] Add a log message to indicate that the file has been deleted.
 
-## Phase 6: Packaging & Distribution
+## Phase 6: Code Enhancements
+
+- [ ] **Dynamic Bitrate Fallback**
+    - [ ] Add a new entry field to the GUI for a fallback bitrate.
+    - [ ] In `conversion_logic.py`, when "dynamic" bitrate is selected and `get_video_bitrate` returns `None`, use the fallback bitrate.
+- [ ] **Clear Log Button**
+    - [ ] Add a "Clear Log" button to the GUI.
+    - [ ] Implement the logic for the "Clear Log" button to clear the log area.
+- [ ] **Enhanced Cancel Logic**
+    - [ ] In `conversion_logic.py`, modify `execute_ffmpeg_command` to store the `subprocess` Popen object.
+    - [ ] In `converter_app.py`, when the "Cancel" button is clicked, in addition to setting the event, call a new method to terminate the `ffmpeg` process directly.
+
+## Phase 7: Packaging & Distribution
 
 - [ ] **PyInstaller Setup**
     - [ ] Install PyInstaller (`pip install pyinstaller`).
