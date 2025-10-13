@@ -95,17 +95,16 @@ This guide provides a step-by-step checklist for implementing the FFMPEG Bulk Co
 
 ## Phase 7: Packaging & Distribution
 
-- [ ] **PyInstaller Setup**
-    - [ ] Install PyInstaller (`pip install pyinstaller`).
-    - [ ] Create a `.spec` file for PyInstaller to configure the build.
+- [x] **PyInstaller Setup**
+    - [x] Install PyInstaller (`pip install pyinstaller`).
+    - [x] Create a `.spec` file for PyInstaller to configure the build.
+- [x] **Build Executable**
+    - [x] Run PyInstaller to package the application into a single `.exe` file.
+    - [x] Test the executable on a clean Windows environment.
 
-- [ ] **Build Executable**
-    - [ ] Run PyInstaller to package the application into a single `.exe` file.
-    - [ ] Test the executable on a clean Windows environment.
-
-- [ ] **Documentation**
-    - [ ] Create a `README.md` file with:
-        - [ ] A description of the tool.
-        - [ ] Instructions for how to build a fresh `.exe` after updating code
-        - [ ] Instructions on how to use it.
-        - [ ] A clear statement that `ffmpeg` must be installed separately. (Include link to ffmpeg install instrucions webpage)
+- [x] **Documentation**
+    - [x] Create a `README.md` file with:
+        - [x] A detailed description of the tool and all of its features.
+        - [x] Instructions on how to use it.
+        - [x] Instructions for how to generate `.spec` file and how to build a fresh `.exe` after updating code
+        - [x] A clear statement that `ffmpeg` must be installed separately. (Include link to ffmpeg install instrucions webpage)
