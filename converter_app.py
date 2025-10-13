@@ -17,6 +17,13 @@ class ConverterApp(ttk.Frame):
         master.columnconfigure(0, weight=1)
         master.rowconfigure(0, weight=1)
 
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=0) # folder_frame row
+        self.rowconfigure(1, weight=0) # options_frame row
+        self.rowconfigure(2, weight=1) # progress_log_frame row
+        self.rowconfigure(3, weight=0) # start_button row
+        self.rowconfigure(4, weight=0) # cancel_button row
+
         # Folder selection frame
         folder_frame = ttk.LabelFrame(self, text="Folder Selection", padding="10")
         folder_frame.grid(row=0, column=0, columnspan=2, sticky="ew")
@@ -93,6 +100,14 @@ class ConverterApp(ttk.Frame):
 
         self.log_area = tk.Text(progress_log_frame, height=10)
         self.log_area.grid(row=0, column=0, sticky="nsew")
+
+        # Configure log tags for color coding
+        self.log_area.tag_configure("info", foreground="black")
+        self.log_area.tag_configure("success", foreground="green")
+        self.log_area.tag_configure("error", foreground="red")
+        self.log_area.tag_configure("warning", foreground="orange")
+        self.log_area.tag_configure("timestamp", foreground="gray")
+        self.log_area.tag_configure("details", foreground="blue")
 
         self.progress_bar = ttk.Progressbar(progress_log_frame, orient="horizontal", mode="determinate")
         self.progress_bar.grid(row=1, column=0, sticky="ew")
@@ -185,23 +200,23 @@ class ConverterApp(ttk.Frame):
         for video_file, process in self.current_processes.items():
             if process.poll() is None:  # Process is still running
                 process.terminate()
-                self.progress_queue.put(("log", f"Terminating conversion for {video_file}.\n"))
+                self.progress_queue.put(("log", ("warning", f"Terminating conversion for {video_file}.")))
         self.current_processes.clear() # Clear the dictionary after attempting to terminate all processes
 
     def _conversion_worker(self, input_dir, output_dir, video_codec, audio_codec, video_bitrate, output_format, delete_input, fallback_bitrate, cap_dynamic_bitrate, concurrent_conversions, start_time, verbose_logging):
 
         if not input_dir or not output_dir:
-            self.progress_queue.put(("log", "Error: Input and output folders must be selected.\n"))
+            self.progress_queue.put(("log", ("error", "Error: Input and output folders must be selected.")))
             self.progress_queue.put(("conversion_finished", None))
             return
 
         video_files = find_video_files(input_dir)
         if not video_files:
-            self.progress_queue.put(("log", f"No video files found in {input_dir}\n"))
+            self.progress_queue.put(("log", ("warning", f"No video files found in {input_dir}")))
             self.progress_queue.put(("conversion_finished", None))
             return
 
-        self.progress_queue.put(("log", f"Found {len(video_files)} video files to convert.\n"))
+        self.progress_queue.put(("log", ("info", f"Found {len(video_files)} video files to convert.")))
         self.progress_queue.put(("progress_max", len(video_files)))
         self.total_files_count = len(video_files) # Set total files count here
 
@@ -245,7 +260,7 @@ class ConverterApp(ttk.Frame):
 
             for future in concurrent.futures.as_completed(futures):
                 if self.cancel_event.is_set():
-                    self.progress_queue.put(("log", "Conversion canceled.\n"))
+                    self.progress_queue.put(("log", ("warning", "Conversion canceled.")))
                     # Attempt to cancel any pending futures
                     for f in futures:
                         f.cancel()
@@ -255,7 +270,7 @@ class ConverterApp(ttk.Frame):
                 try:
                     result = future.result() # This will re-raise any exception from _convert_single_file
                     if result["success"]:
-                        self.progress_queue.put(("log", f"Successfully converted {video_file} to {result["output_filepath"]}.\n"))
+                        self.progress_queue.put(("log", ("success", f"Successfully converted {video_file} to {result["output_filepath"]}.")))
                         self.completed_files_count += 1
                         elapsed_time_for_file = time.time() - self.conversion_start_times.get(video_file, time.time())
                         avg_time_per_file = (time.time() - start_time) / self.completed_files_count
@@ -266,20 +281,20 @@ class ConverterApp(ttk.Frame):
                         if delete_input:
                             try:
                                 os.remove(video_file)
-                                self.progress_queue.put(("log", f"Deleted input file: {video_file}\n"))
+                                self.progress_queue.put(("log", ("info", f"Deleted input file: {video_file}")))
                             except OSError as e:
-                                self.progress_queue.put(("log", f"Error deleting file {video_file}: {e}\n"))
+                                self.progress_queue.put(("log", ("error", f"Error deleting file {video_file}: {e}")))
                     else:
-                        self.progress_queue.put(("log", f"Error converting {video_file}: {result["error"]}\n"))
+                        self.progress_queue.put(("log", ("error", f"Error converting {video_file}: {result["error"]}")))
                 except concurrent.futures.CancelledError:
-                    self.progress_queue.put(("log", f"Conversion of {video_file} was cancelled.\n"))
+                    self.progress_queue.put(("log", ("warning", f"Conversion of {video_file} was cancelled.")))
                 except Exception as exc:
-                    self.progress_queue.put(("log", f"Error processing {video_file}: {exc}\n"))
+                    self.progress_queue.put(("log", ("error", f"Error processing {video_file}: {exc}")))
                 finally:
                     completed_count += 1
                     self.progress_queue.put(("progress", completed_count))
 
-        self.progress_queue.put(("log", "All conversions complete.\n"))
+        self.progress_queue.put(("log", ("info", "All conversions complete.")))
         self.progress_queue.put(("conversion_finished", None))
 
     def _convert_single_file(self, video_file, output_dir, video_codec, audio_codec, video_bitrate, output_format, delete_input, fallback_bitrate, cap_dynamic_bitrate, cancel_event, verbose_logging):
@@ -294,8 +309,8 @@ class ConverterApp(ttk.Frame):
             cap_dynamic_bitrate,
         )
         
-        log_message = f"Converting {video_file} to {output_filepath} with video codec: {video_codec}, audio codec: {audio_codec}, bitrate: {video_bitrate}, format: {output_format}.\n"
-        self.progress_queue.put(("log", log_message))
+        log_message = f"Converting {video_file} to {output_filepath} with video codec: {video_codec}, audio codec: {audio_codec}, bitrate: {video_bitrate}, format: {output_format}."
+        self.progress_queue.put(("log", ("info", log_message)))
 
         process = execute_ffmpeg_command(command, verbose_logging)
         # Store the process object for potential termination
@@ -305,9 +320,9 @@ class ConverterApp(ttk.Frame):
 
         if verbose_logging:
             if stdout:
-                self.progress_queue.put(("log", f"FFmpeg STDOUT for {video_file}:\n{stdout}\n"))
+                self.progress_queue.put(("log", ("details", f"FFmpeg STDOUT for {video_file}:\n{stdout.strip()}")))
             if stderr:
-                self.progress_queue.put(("log", f"FFmpeg STDERR for {video_file}:\n{stderr}\n"))
+                self.progress_queue.put(("log", ("error", f"FFmpeg STDERR for {video_file}:\n{stderr.strip()}")))
 
         # Remove process from tracking after it completes
         if video_file in self.current_processes:
@@ -324,9 +339,9 @@ class ConverterApp(ttk.Frame):
                 f"    Resolution: {actual_details["resolution"]}\n"
                 f"    Video Codec: {actual_details["video_codec"]}\n"
                 f"    Audio Codec: {actual_details["audio_codec"]}\n"
-                f"    Bitrate: {actual_details["bitrate"]}\n"
+                f"    Bitrate: {actual_details["bitrate"]}"
             )
-            self.progress_queue.put(("log", details_log))
+            self.progress_queue.put(("log", ("details", details_log)))
             return {"success": True, "output_filepath": output_filepath}
         else:
             return {"success": False, "error": stderr, "output_filepath": output_filepath}
@@ -336,7 +351,12 @@ class ConverterApp(ttk.Frame):
             while True:
                 message_type, data = self.progress_queue.get_nowait()
                 if message_type == "log":
-                    self.log_area.insert(tk.END, data)
+                    log_type = data[0]
+                    message = data[1]
+                    timestamp = time.strftime("[%H:%M:%S]")
+                    self.log_area.insert(tk.END, f"{timestamp} ", "timestamp")
+                    self.log_area.insert(tk.END, f"{message}\n", log_type)
+                    self.log_area.see(tk.END) # Auto-scroll to the end
                 elif message_type == "progress_max":
                     self.progress_bar["maximum"] = data
                 elif message_type == "progress":
