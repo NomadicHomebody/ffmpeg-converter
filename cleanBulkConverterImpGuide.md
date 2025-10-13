@@ -69,7 +69,16 @@ This guide provides a step-by-step checklist for implementing the FFMPEG Bulk Co
     - [x] Catch any errors from the `subprocess` and display them in the log area.
     - [x] Add checks to ensure that the user has selected both an input and an output folder before starting the conversion.
 
-## Phase 5: Packaging & Distribution
+## Phase 5: Delete Input File
+
+- [x] **GUI Toggle**
+    - [x] Add a checkbox/toggle switch to the GUI labeled "Delete input files after successful conversion".
+- [x] **Deletion Logic**
+    - [x] In the `_conversion_worker` method, after a successful conversion, check if the delete toggle is enabled.
+    - [x] If enabled, use `os.remove()` to delete the original input file.
+    - [x] Add a log message to indicate that the file has been deleted.
+
+## Phase 6: Packaging & Distribution
 
 - [ ] **PyInstaller Setup**
     - [ ] Install PyInstaller (`pip install pyinstaller`).
@@ -82,5 +91,6 @@ This guide provides a step-by-step checklist for implementing the FFMPEG Bulk Co
 - [ ] **Documentation**
     - [ ] Create a `README.md` file with:
         - [ ] A description of the tool.
+        - [ ] Instructions for how to build a fresh `.exe` after updating code
         - [ ] Instructions on how to use it.
-        - [ ] A clear statement that `ffmpeg` must be installed separately.
+        - [ ] A clear statement that `ffmpeg` must be installed separately. (Include link to ffmpeg install instrucions webpage)
