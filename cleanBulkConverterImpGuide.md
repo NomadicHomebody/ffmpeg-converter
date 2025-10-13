@@ -111,23 +111,26 @@ This guide provides a step-by-step checklist for implementing the FFMPEG Bulk Co
 
 ## Phase 8: Enhancements
 
-- [ ] **Intelligent Bitrate Controls**
-    - [ ] **Implement "Optimized" Bitrate Option:**
-        - [ ] **GUI:** Add "Optimized" as a new option to the video bitrate dropdown.
-        - [ ] **Core Logic (`conversion_logic.py`):** Develop a function to determine the optimal output bitrate based on input video resolution, input video codec, and selected output codec.
-        - [ ] **Data Structure:** Define and implement the mapping table for optimal bitrates covering 720p, 1080p, 1440p, and 4k resolutions, and codecs like H.264, HEVC, and AV1.
-    - [ ] **Implement Fallback Bitrate:**
-        - [ ] **GUI:** Add a new input field labeled "Fallback Bitrate (Mbps)" with a default value of `20`.
-        - [ ] **Core Logic (`conversion_logic.py`):** Integrate logic to use the fallback bitrate if no specific mapping is found for an "Optimized" conversion.
+- [x] **Intelligent Bitrate Controls**
+    - [x] **Implement "Optimized" Bitrate Option:**
+        - [x] **GUI:** Add "Optimized" as a new option to the video bitrate dropdown.
+        - [x] **Core Logic (`conversion_logic.py`):** Develop a function to determine the optimal output bitrate based on input video resolution, input video codec, and selected output codec.
+        - [x] **Data Structure:** Define and implement the mapping table for optimal bitrates covering 720p, 1080p, 1440p, and 4k resolutions, and codecs like H.264, HEVC, and AV1.
+    - [x] **Implement Fallback Bitrate:**
+        - [x] **GUI:** Add a new input field labeled "Fallback Bitrate (Mbps)" with a default value of `20`.
+        - [x] **Core Logic (`conversion_logic.py`):** Integrate logic to use the fallback bitrate if no specific mapping is found for an "Optimized" conversion.
+    - [x] **Externalize Bitrate Mapping:**
+        - [x] **Configuration:** Migrate the `OPTIMIZED_BITRATE_MAP` from `conversion_logic.py` to a separate configuration file (e.g., `bitrate_config.json`).
+        - [x] **Loading Logic:** Implement logic in `conversion_logic.py` to load the bitrate map from this configuration file on application startup.
 
-- [ ] **Concurrency Management**
-    - [ ] **Implement Concurrency Control GUI:**
-        - [ ] **GUI:** Add an integer input field (e.g., spinner or text box with +/- buttons) labeled "Concurrent Conversions".
-        - [ ] **Settings:** Set default to `2`, minimum to `1`, and maximum to `32`.
-    - [ ] **Implement Parallel Conversion Logic:**
-        - [ ] **Core Logic (`conversion_logic.py` / `converter_app.py`):** Modify the conversion process to manage a pool of background workers, executing `ffmpeg` conversions in parallel up to the specified limit.
-    - [ ] **Implement Concurrent Error Handling:**
-        - [ ] **Core Logic (`conversion_logic.py` / `converter_app.py`):** Ensure that if a conversion fails, the error is logged, but the overall process continues for other files without halting.
+- [x] **Concurrency Management**
+    - [x] **Implement Concurrency Control GUI:**
+        - [x] **GUI:** Add an integer input field (e.g., spinner or text box with +/- buttons) labeled "Concurrent Conversions".
+        - [x] **Settings:** Set default to `2`, minimum to `1`, and maximum to `32`.
+    - [x] **Implement Parallel Conversion Logic:**
+        - [x] **Core Logic (`conversion_logic.py` / `converter_app.py`):** Modify the conversion process to manage a pool of background workers, executing `ffmpeg` conversions in parallel up to the specified limit.
+    - [x] **Implement Concurrent Error Handling:**
+        - [x] **Core Logic (`conversion_logic.py` / `converter_app.py`):** Ensure that if a conversion fails, the error is logged, but the overall process continues for other files without halting.
 
 - [ ] **Enhanced Progress Reporting & Logging**
     - [ ] **Implement Estimated Time Remaining (ETA):**
@@ -138,6 +141,7 @@ This guide provides a step-by-step checklist for implementing the FFMPEG Bulk Co
         - [ ] **Core Logic (`converter_app.py` / `conversion_logic.py`):** When checked, display more detailed `ffmpeg` output in the log area.
         - [ ] **GUI:** Add a button labeled "Save Log".
         - [ ] **Core Logic (`converter_app.py`):** Implement functionality to save the log area content to a `.txt` file upon button click.
+        - [ ] **GUI**: Also log the output file's expected bitrate/resolution/file type/codec details for each conversion done
 
 - [ ] **App Experience & UI Scaling**
     - [ ] **Implement Dynamic Window Resizing:**

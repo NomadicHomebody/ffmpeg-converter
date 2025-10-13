@@ -4,6 +4,8 @@ import threading
 import queue
 import shutil
 import os
+import concurrent.futures
+import functools
 
 from conversion_logic import find_video_files, build_ffmpeg_command, execute_ffmpeg_command, get_output_filepath
 
@@ -55,8 +57,8 @@ class ConverterApp(ttk.Frame):
 
         # Video Bitrate
         ttk.Label(options_frame, text="Video Bitrate:").grid(row=3, column=0, sticky=tk.W)
-        self.video_bitrate = tk.StringVar(value="dynamic")
-        bitrates = ["dynamic"] + [f"{i}M" for i in range(5, 251, 5)]
+        self.video_bitrate = tk.StringVar(value="optimized")
+        bitrates = ["dynamic", "optimized"] + [f"{i}M" for i in range(5, 251, 5)]
         ttk.Combobox(options_frame, textvariable=self.video_bitrate, values=bitrates, state="readonly").grid(row=3, column=1, sticky="ew")
 
         # Delete input file checkbox
@@ -71,6 +73,12 @@ class ConverterApp(ttk.Frame):
         # Cap dynamic bitrate checkbox
         self.cap_dynamic_bitrate = tk.BooleanVar()
         ttk.Checkbutton(options_frame, text="Cap dynamic bitrate at fallback bitrate", variable=self.cap_dynamic_bitrate).grid(row=6, column=0, columnspan=2, sticky=tk.W)
+
+        # Concurrent Conversions
+        ttk.Label(options_frame, text="Concurrent Conversions:").grid(row=7, column=0, sticky=tk.W)
+        self.concurrent_conversions = tk.IntVar(value=2)
+        self.concurrent_conversions_spinbox = ttk.Spinbox(options_frame, from_=1, to=32, textvariable=self.concurrent_conversions, state="readonly")
+        self.concurrent_conversions_spinbox.grid(row=7, column=1, sticky="ew")
 
         # Progress and Log frame
         progress_log_frame = ttk.LabelFrame(self, text="Progress and Log", padding="10")
@@ -95,6 +103,7 @@ class ConverterApp(ttk.Frame):
         self.cancel_button.grid(row=4, column=0, columnspan=2, sticky="ew")
 
         self.conversion_widgets = [self.start_button] + list(self.children.values())
+        self.current_processes = {}
 
         self._check_ffmpeg()
 
@@ -127,6 +136,7 @@ class ConverterApp(ttk.Frame):
             self.delete_input.get(),
             self.fallback_bitrate.get(),
             self.cap_dynamic_bitrate.get(),
+            self.concurrent_conversions.get(),
         )
 
         self.thread = threading.Thread(target=self._conversion_worker, args=args)
@@ -141,60 +151,110 @@ class ConverterApp(ttk.Frame):
 
 
     def _cancel_conversion(self):
-        if hasattr(self, 'process') and self.process.poll() is None:
-            self.process.terminate()
         self.cancel_event.set()
+        for video_file, process in self.current_processes.items():
+            if process.poll() is None:  # Process is still running
+                process.terminate()
+                self.progress_queue.put(("log", f"Terminating conversion for {video_file}.\n"))
+        self.current_processes.clear() # Clear the dictionary after attempting to terminate all processes
 
-    def _conversion_worker(self, input_dir, output_dir, video_codec, audio_codec, video_bitrate, output_format, delete_input, fallback_bitrate, cap_dynamic_bitrate):
+    def _conversion_worker(self, input_dir, output_dir, video_codec, audio_codec, video_bitrate, output_format, delete_input, fallback_bitrate, cap_dynamic_bitrate, concurrent_conversions):
 
         if not input_dir or not output_dir:
             self.progress_queue.put(("log", "Error: Input and output folders must be selected.\n"))
+            self.progress_queue.put(("conversion_finished", None))
             return
 
         video_files = find_video_files(input_dir)
         if not video_files:
             self.progress_queue.put(("log", f"No video files found in {input_dir}\n"))
+            self.progress_queue.put(("conversion_finished", None))
             return
 
         self.progress_queue.put(("log", f"Found {len(video_files)} video files to convert.\n"))
         self.progress_queue.put(("progress_max", len(video_files)))
 
-        for i, video_file in enumerate(video_files):
-            if self.cancel_event.is_set():
-                self.progress_queue.put(("log", "Conversion canceled.\n"))
-                return
+        # Use a ThreadPoolExecutor for concurrent conversions
+        with concurrent.futures.ThreadPoolExecutor(max_workers=concurrent_conversions) as executor:
+            # Store futures to track progress and results
+            futures = {
+                executor.submit(self._convert_single_file,
+                                video_file,
+                                output_dir,
+                                video_codec,
+                                audio_codec,
+                                video_bitrate,
+                                output_format,
+                                delete_input,
+                                fallback_bitrate,
+                                cap_dynamic_bitrate,
+                                self.cancel_event): video_file
+                for video_file in video_files
+            }
 
-            output_filepath = get_output_filepath(video_file, output_dir, output_format)
-            command = build_ffmpeg_command(
-                video_file,
-                output_filepath,
-                video_codec,
-                audio_codec,
-                video_bitrate,
-                fallback_bitrate,
-                cap_dynamic_bitrate,
-            )
-            self.progress_queue.put(("log", f"Converting {video_file} to {output_filepath}...\n"))
-            self.process = execute_ffmpeg_command(command)
-            stdout, stderr = self.process.communicate()
+            completed_count = 0
+            for future in concurrent.futures.as_completed(futures):
+                if self.cancel_event.is_set():
+                    self.progress_queue.put(("log", "Conversion canceled.\n"))
+                    # Attempt to cancel any pending futures
+                    for f in futures:
+                        f.cancel()
+                    break
 
-            if self.cancel_event.is_set():
-                return
-
-            if self.process.returncode == 0:
-                self.progress_queue.put(("log", "Conversion successful.\n"))
-                if delete_input:
-                    try:
-                        os.remove(video_file)
-                        self.progress_queue.put(("log", f"Deleted input file: {video_file}\n"))
-                    except OSError as e:
-                        self.progress_queue.put(("log", f"Error deleting file {video_file}: {e}\n"))
-            else:
-                self.progress_queue.put(("log", f"Error converting {video_file}: {stderr}\n"))
-            
-            self.progress_queue.put(("progress", i + 1))
+                video_file = futures[future]
+                try:
+                    result = future.result() # This will re-raise any exception from _convert_single_file
+                    if result["success"]:
+                        self.progress_queue.put(("log", f"Successfully converted {video_file} to {result["output_filepath"]}.\n"))
+                        if delete_input:
+                            try:
+                                os.remove(video_file)
+                                self.progress_queue.put(("log", f"Deleted input file: {video_file}\n"))
+                            except OSError as e:
+                                self.progress_queue.put(("log", f"Error deleting file {video_file}: {e}\n"))
+                    else:
+                        self.progress_queue.put(("log", f"Error converting {video_file}: {result["error"]}\n"))
+                except concurrent.futures.CancelledError:
+                    self.progress_queue.put(("log", f"Conversion of {video_file} was cancelled.\n"))
+                except Exception as exc:
+                    self.progress_queue.put(("log", f"Error processing {video_file}: {exc}\n"))
+                finally:
+                    completed_count += 1
+                    self.progress_queue.put(("progress", completed_count))
 
         self.progress_queue.put(("log", "All conversions complete.\n"))
+        self.progress_queue.put(("conversion_finished", None))
+
+    def _convert_single_file(self, video_file, output_dir, video_codec, audio_codec, video_bitrate, output_format, delete_input, fallback_bitrate, cap_dynamic_bitrate, cancel_event):
+        output_filepath = get_output_filepath(video_file, output_dir, output_format)
+        command = build_ffmpeg_command(
+            video_file,
+            output_filepath,
+            video_codec,
+            audio_codec,
+            video_bitrate,
+            fallback_bitrate,
+            cap_dynamic_bitrate,
+        )
+        self.progress_queue.put(("log", f"Converting {video_file} to {output_filepath}...\n"))
+        
+        process = execute_ffmpeg_command(command)
+        # Store the process object for potential termination
+        self.current_processes[video_file] = process
+
+        stdout, stderr = process.communicate()
+
+        # Remove process from tracking after it completes
+        if video_file in self.current_processes:
+            del self.current_processes[video_file]
+
+        if cancel_event.is_set():
+            return {"success": False, "error": "Conversion cancelled", "output_filepath": output_filepath}
+
+        if process.returncode == 0:
+            return {"success": True, "output_filepath": output_filepath}
+        else:
+            return {"success": False, "error": stderr, "output_filepath": output_filepath}
 
     def _update_progress(self):
         try:
@@ -206,13 +266,18 @@ class ConverterApp(ttk.Frame):
                     self.progress_bar["maximum"] = data
                 elif message_type == "progress":
                     self.progress_bar["value"] = data
-                self.update_idletasks()
+                    self.update_idletasks()
+                elif message_type == "conversion_finished":
+                    self._toggle_widgets(True)
+                    self.cancel_button.config(state=tk.DISABLED)
+                    return # Exit the update loop as conversions are finished
         except queue.Empty:
             pass
 
         if self.thread.is_alive():
             self.after(100, self._update_progress)
         else:
+            # If thread is not alive and conversion_finished wasn't sent (e.g., early exit)
             self._toggle_widgets(True)
             self.cancel_button.config(state=tk.DISABLED)
 

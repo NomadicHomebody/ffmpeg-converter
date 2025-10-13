@@ -2,6 +2,16 @@ import os
 import subprocess
 import json
 
+# Load OPTIMIZED_BITRATE_MAP from a configuration file
+OPTIMIZED_BITRATE_MAP = {}
+try:
+    with open("bitrate_config.json", "r") as f:
+        OPTIMIZED_BITRATE_MAP = json.load(f)
+except FileNotFoundError:
+    print("Error: bitrate_config.json not found. Optimized bitrate feature will be unavailable.")
+except json.JSONDecodeError:
+    print("Error: Could not decode bitrate_config.json. Check file format.")
+
 def find_video_files(directory: str) -> list[str]:
     """
     Scans a directory for video files (non-recursively).
@@ -54,6 +64,77 @@ def get_video_bitrate(input_file: str) -> str | None:
     except (subprocess.CalledProcessError, FileNotFoundError, json.JSONDecodeError):
         return None
 
+def _get_video_details(input_file: str) -> dict | None:
+    """
+    Gets video details (resolution, codec) of a video file using ffprobe.
+
+    Args:
+        input_file: The path to the input video file.
+
+    Returns:
+        A dictionary containing 'resolution' and 'codec_name', or None if it cannot be determined.
+    """
+    command = [
+        "ffprobe",
+        "-v",
+        "quiet",
+        "-print_format",
+        "json",
+        "-show_streams",
+        input_file,
+    ]
+    try:
+        result = subprocess.run(command, capture_output=True, text=True, check=True)
+        data = json.loads(result.stdout)
+        for stream in data.get("streams", []):
+            if stream.get("codec_type") == "video":
+                width = stream.get("width")
+                height = stream.get("height")
+                codec_name = stream.get("codec_name")
+                if width and height and codec_name:
+                    resolution = ""
+                    if height == 720:
+                        resolution = "720p"
+                    elif height == 1080:
+                        resolution = "1080p"
+                    elif height == 1440:
+                        resolution = "1440p"
+                    elif height == 2160:
+                        resolution = "2160p" # 4K
+                    return {"resolution": resolution, "codec_name": codec_name}
+        return None
+    except (subprocess.CalledProcessError, FileNotFoundError, json.JSONDecodeError):
+        return None
+
+
+def _get_optimized_bitrate(input_file: str, output_video_codec: str, fallback_bitrate: str) -> str:
+    """
+    Determines the optimized bitrate based on input video details and a mapping table.
+
+    Args:
+        input_file: The path to the input video file.
+        output_video_codec: The target output video codec.
+        fallback_bitrate: The bitrate to use if no optimized mapping is found.
+
+    Returns:
+        The optimized bitrate as a string (e.g., "5M"), or the fallback bitrate.
+    """
+    video_details = _get_video_details(input_file)
+    if not video_details:
+        return fallback_bitrate
+
+    resolution = video_details.get("resolution")
+    input_codec = video_details.get("codec_name")
+
+    if resolution and input_codec and resolution in OPTIMIZED_BITRATE_MAP:
+        resolution_map = OPTIMIZED_BITRATE_MAP[resolution]
+        if input_codec in resolution_map:
+            codec_map = resolution_map[input_codec]
+            if output_video_codec in codec_map:
+                return codec_map[output_video_codec]
+
+    return fallback_bitrate
+
 
 def build_ffmpeg_command(
     input_file: str,
@@ -73,6 +154,8 @@ def build_ffmpeg_command(
         video_codec: The video codec to use.
         audio_codec: The audio codec to use.
         video_bitrate: The video bitrate to use.
+        fallback_bitrate: The bitrate to use if optimized mapping is not found.
+        cap_dynamic_bitrate: Whether to cap the optimized bitrate at the fallback bitrate.
 
     Returns:
         A list of strings representing the ffmpeg command.
@@ -90,12 +173,24 @@ def build_ffmpeg_command(
         audio_codec,
     ]
 
-    if video_bitrate == "dynamic":
+    if video_bitrate == "optimized":
+        target_bitrate = _get_optimized_bitrate(input_file, video_codec, fallback_bitrate)
+        if cap_dynamic_bitrate:
+            try:
+                # Convert to common unit (bits) for comparison
+                target_bitrate_val = int(target_bitrate.upper().replace("M", "000000").replace("K", "000"))
+                fallback_bitrate_val = int(fallback_bitrate.upper().replace("M", "000000").replace("K", "000"))
+                if target_bitrate_val > fallback_bitrate_val:
+                    target_bitrate = fallback_bitrate
+            except ValueError:
+                pass  # Handle cases where bitrate strings are not perfectly parsable
+        command.extend(["-b:v", target_bitrate])
+    elif video_bitrate == "dynamic":
         bitrate = get_video_bitrate(input_file)
         if bitrate:
             if cap_dynamic_bitrate:
                 try:
-                    dynamic_bitrate_int = int(bitrate)
+                    dynamic_bitrate_int = int(bitrate.upper().replace("M", "000000").replace("K", "000"))
                     fallback_bitrate_int = int(fallback_bitrate.upper().replace("M", "000000").replace("K", "000"))
                     if dynamic_bitrate_int > fallback_bitrate_int:
                         bitrate = fallback_bitrate
