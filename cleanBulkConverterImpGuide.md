@@ -132,16 +132,16 @@ This guide provides a step-by-step checklist for implementing the FFMPEG Bulk Co
     - [x] **Implement Concurrent Error Handling:**
         - [x] **Core Logic (`conversion_logic.py` / `converter_app.py`):** Ensure that if a conversion fails, the error is logged, but the overall process continues for other files without halting.
 
-- [ ] **Enhanced Progress Reporting & Logging**
-    - [ ] **Implement Estimated Time Remaining (ETA):**
-        - [ ] **GUI:** Add a label to display the estimated time remaining for the entire batch.
-        - [ ] **Core Logic (`converter_app.py`):** Implement logic to calculate ETA using a simple averaging method: `(Average time per completed file) * (Number of remaining files)`. Update the ETA as each file completes.
-    - [ ] **Implement Verbose Logging & Export:**
-        - [ ] **GUI:** Add a checkbox labeled "Enable Verbose Logging".
-        - [ ] **Core Logic (`converter_app.py` / `conversion_logic.py`):** When checked, display more detailed `ffmpeg` output in the log area.
-        - [ ] **GUI:** Add a button labeled "Save Log".
-        - [ ] **Core Logic (`converter_app.py`):** Implement functionality to save the log area content to a `.txt` file upon button click.
-        - [ ] **GUI**: Also log the output file's expected bitrate/resolution/file type/codec details for each conversion done
+- [x] **Enhanced Progress Reporting & Logging**
+    - [x] **Implement Estimated Time Remaining (ETA):**
+        - [x] **GUI:** Add a label to display the estimated time remaining for the entire batch.
+        - [x] **Core Logic (`converter_app.py`):** Implement logic to calculate ETA using a simple averaging method: `(Average time per completed file) * (Number of remaining files)`. Update the ETA as each file completes.
+    - [x] **Implement Verbose Logging & Export:**
+        - [x] **GUI:** Add a checkbox labeled "Enable Verbose Logging".
+        - [x] **Core Logic (`converter_app.py` / `conversion_logic.py`):** When checked, display more detailed `ffmpeg` output in the log area.
+        - [x] **GUI:** Add a button labeled "Save Log".
+        - [x] **Core Logic (`converter_app.py`):** Implement functionality to save the log area content to a `.txt` file upon button click.
+        - [x] **GUI**: Also log the output file's expected bitrate/resolution/file type/codec details for each conversion done
 
 - [ ] **App Experience & UI Scaling**
     - [ ] **Implement Dynamic Window Resizing:**

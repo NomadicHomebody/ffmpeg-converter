@@ -6,6 +6,7 @@ import shutil
 import os
 import concurrent.futures
 import functools
+import time
 
 from conversion_logic import find_video_files, build_ffmpeg_command, execute_ffmpeg_command, get_output_filepath
 
@@ -80,6 +81,10 @@ class ConverterApp(ttk.Frame):
         self.concurrent_conversions_spinbox = ttk.Spinbox(options_frame, from_=1, to=32, textvariable=self.concurrent_conversions, state="readonly")
         self.concurrent_conversions_spinbox.grid(row=7, column=1, sticky="ew")
 
+        # Verbose Logging
+        self.verbose_logging = tk.BooleanVar(value=False)
+        ttk.Checkbutton(options_frame, text="Enable Verbose Logging", variable=self.verbose_logging).grid(row=8, column=0, columnspan=2, sticky=tk.W)
+
         # Progress and Log frame
         progress_log_frame = ttk.LabelFrame(self, text="Progress and Log", padding="10")
         progress_log_frame.grid(row=2, column=0, columnspan=2, sticky="nsew")
@@ -92,8 +97,17 @@ class ConverterApp(ttk.Frame):
         self.progress_bar = ttk.Progressbar(progress_log_frame, orient="horizontal", mode="determinate")
         self.progress_bar.grid(row=1, column=0, sticky="ew")
 
-        # Clear Log button
-        ttk.Button(progress_log_frame, text="Clear Log", command=self._clear_log).grid(row=2, column=0, sticky=tk.E)
+        self.eta_label = ttk.Label(progress_log_frame, text="ETA: Calculating...")
+        self.eta_label.grid(row=2, column=0, sticky=tk.W)
+
+        # Log control buttons
+        log_buttons_frame = ttk.Frame(progress_log_frame)
+        log_buttons_frame.grid(row=3, column=0, sticky="ew")
+        log_buttons_frame.columnconfigure(0, weight=1)
+        log_buttons_frame.columnconfigure(1, weight=1)
+
+        ttk.Button(log_buttons_frame, text="Clear Log", command=self._clear_log).grid(row=0, column=0, sticky=tk.W)
+        ttk.Button(log_buttons_frame, text="Save Log", command=self._save_log).grid(row=0, column=1, sticky=tk.E)
 
         # Start button
         self.start_button = ttk.Button(self, text="Start Conversion", command=self._start_conversion)
@@ -120,11 +134,25 @@ class ConverterApp(ttk.Frame):
     def _clear_log(self):
         self.log_area.delete("1.0", tk.END)
 
+    def _save_log(self):
+        file_path = filedialog.asksaveasfilename(defaultextension=".txt",
+                                                 filetypes=[("Text files", "*.txt"), ("All files", "*.*")],
+                                                 title="Save Log File")
+        if file_path:
+            try:
+                with open(file_path, "w") as f:
+                    f.write(self.log_area.get("1.0", tk.END))
+                messagebox.showinfo("Save Log", "Log saved successfully!")
+            except Exception as e:
+                messagebox.showerror("Save Log Error", f"Failed to save log: {e}")
+
     def _start_conversion(self):
         self._toggle_widgets(False)
         self.cancel_button.config(state=tk.NORMAL)
         self.cancel_event = threading.Event()
         self.progress_queue = queue.Queue()
+        self.start_time = time.time() # Initialize start time
+        self.total_files_count = 0 # Will be set in _conversion_worker
 
         args = (
             self.input_dir.get(),
@@ -137,6 +165,8 @@ class ConverterApp(ttk.Frame):
             self.fallback_bitrate.get(),
             self.cap_dynamic_bitrate.get(),
             self.concurrent_conversions.get(),
+            self.start_time, # Pass start_time
+            self.verbose_logging.get(), # Pass verbose_logging state
         )
 
         self.thread = threading.Thread(target=self._conversion_worker, args=args)
@@ -158,7 +188,7 @@ class ConverterApp(ttk.Frame):
                 self.progress_queue.put(("log", f"Terminating conversion for {video_file}.\n"))
         self.current_processes.clear() # Clear the dictionary after attempting to terminate all processes
 
-    def _conversion_worker(self, input_dir, output_dir, video_codec, audio_codec, video_bitrate, output_format, delete_input, fallback_bitrate, cap_dynamic_bitrate, concurrent_conversions):
+    def _conversion_worker(self, input_dir, output_dir, video_codec, audio_codec, video_bitrate, output_format, delete_input, fallback_bitrate, cap_dynamic_bitrate, concurrent_conversions, start_time, verbose_logging):
 
         if not input_dir or not output_dir:
             self.progress_queue.put(("log", "Error: Input and output folders must be selected.\n"))
@@ -173,6 +203,7 @@ class ConverterApp(ttk.Frame):
 
         self.progress_queue.put(("log", f"Found {len(video_files)} video files to convert.\n"))
         self.progress_queue.put(("progress_max", len(video_files)))
+        self.total_files_count = len(video_files) # Set total files count here
 
         # Use a ThreadPoolExecutor for concurrent conversions
         with concurrent.futures.ThreadPoolExecutor(max_workers=concurrent_conversions) as executor:
@@ -188,11 +219,30 @@ class ConverterApp(ttk.Frame):
                                 delete_input,
                                 fallback_bitrate,
                                 cap_dynamic_bitrate,
-                                self.cancel_event): video_file
+                                self.cancel_event,
+                                verbose_logging): video_file
                 for video_file in video_files
             }
 
             completed_count = 0
+            self.completed_files_count = 0 # Initialize for ETA calculation
+            self.conversion_start_times = {} # To store start time of each file conversion
+
+            for video_file in video_files:
+                self.conversion_start_times[video_file] = time.time()
+                futures[executor.submit(self._convert_single_file,
+                                        video_file,
+                                        output_dir,
+                                        video_codec,
+                                        audio_codec,
+                                        video_bitrate,
+                                        output_format,
+                                        delete_input,
+                                        fallback_bitrate,
+                                        cap_dynamic_bitrate,
+                                        self.cancel_event,
+                                        verbose_logging)] = video_file
+
             for future in concurrent.futures.as_completed(futures):
                 if self.cancel_event.is_set():
                     self.progress_queue.put(("log", "Conversion canceled.\n"))
@@ -206,6 +256,13 @@ class ConverterApp(ttk.Frame):
                     result = future.result() # This will re-raise any exception from _convert_single_file
                     if result["success"]:
                         self.progress_queue.put(("log", f"Successfully converted {video_file} to {result["output_filepath"]}.\n"))
+                        self.completed_files_count += 1
+                        elapsed_time_for_file = time.time() - self.conversion_start_times.get(video_file, time.time())
+                        avg_time_per_file = (time.time() - start_time) / self.completed_files_count
+                        remaining_files = self.total_files_count - self.completed_files_count
+                        eta_seconds = avg_time_per_file * remaining_files
+                        self.progress_queue.put(("eta", eta_seconds))
+
                         if delete_input:
                             try:
                                 os.remove(video_file)
@@ -225,7 +282,7 @@ class ConverterApp(ttk.Frame):
         self.progress_queue.put(("log", "All conversions complete.\n"))
         self.progress_queue.put(("conversion_finished", None))
 
-    def _convert_single_file(self, video_file, output_dir, video_codec, audio_codec, video_bitrate, output_format, delete_input, fallback_bitrate, cap_dynamic_bitrate, cancel_event):
+    def _convert_single_file(self, video_file, output_dir, video_codec, audio_codec, video_bitrate, output_format, delete_input, fallback_bitrate, cap_dynamic_bitrate, cancel_event, verbose_logging):
         output_filepath = get_output_filepath(video_file, output_dir, output_format)
         command = build_ffmpeg_command(
             video_file,
@@ -236,13 +293,21 @@ class ConverterApp(ttk.Frame):
             fallback_bitrate,
             cap_dynamic_bitrate,
         )
-        self.progress_queue.put(("log", f"Converting {video_file} to {output_filepath}...\n"))
         
-        process = execute_ffmpeg_command(command)
+        log_message = f"Converting {video_file} to {output_filepath} with video codec: {video_codec}, audio codec: {audio_codec}, bitrate: {video_bitrate}, format: {output_format}.\n"
+        self.progress_queue.put(("log", log_message))
+
+        process = execute_ffmpeg_command(command, verbose_logging)
         # Store the process object for potential termination
         self.current_processes[video_file] = process
 
         stdout, stderr = process.communicate()
+
+        if verbose_logging:
+            if stdout:
+                self.progress_queue.put(("log", f"FFmpeg STDOUT for {video_file}:\n{stdout}\n"))
+            if stderr:
+                self.progress_queue.put(("log", f"FFmpeg STDERR for {video_file}:\n{stderr}\n"))
 
         # Remove process from tracking after it completes
         if video_file in self.current_processes:
@@ -266,7 +331,11 @@ class ConverterApp(ttk.Frame):
                     self.progress_bar["maximum"] = data
                 elif message_type == "progress":
                     self.progress_bar["value"] = data
-                    self.update_idletasks()
+                elif message_type == "eta":
+                    hours, remainder = divmod(int(data), 3600)
+                    minutes, seconds = divmod(remainder, 60)
+                    self.eta_label.config(text=f"ETA: {hours:02}:{minutes:02}:{seconds:02}")
+                    self.update_idletasks()                
                 elif message_type == "conversion_finished":
                     self._toggle_widgets(True)
                     self.cancel_button.config(state=tk.DISABLED)

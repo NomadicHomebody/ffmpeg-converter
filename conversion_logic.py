@@ -207,16 +207,22 @@ def build_ffmpeg_command(
     return command
 
 
-def execute_ffmpeg_command(command: list[str]) -> subprocess.Popen:
+def execute_ffmpeg_command(command: list[str], verbose_logging: bool) -> subprocess.Popen:
     """
     Executes an ffmpeg command.
 
     Args:
         command: The ffmpeg command to execute, as a list of strings.
+        verbose_logging: If True, ffmpeg will output verbose logs.
     
     Returns:
         The Popen object for the running process.
     """
+    if not verbose_logging:
+        # Insert -v quiet after ffmpeg if not verbose
+        command.insert(1, "-v")
+        command.insert(2, "quiet")
+
     return subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
 
 
