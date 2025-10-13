@@ -31,19 +31,10 @@ python converter_app.py
 ```
 *Note: `converter_app.py` has not been created yet.*
 
-**3. Running Tests:**
-The project uses `pytest` for testing.
-```bash
-pytest
-```
-
 ## Development Conventions
 
 *   **Workflow:** The project follows a structured development process, starting with planning (`.md` files) before implementation.
 *   **Code Style:** Follow standard Python conventions (PEP 8).
-*   **Testing:**
-    *   Tests are located in the `test/` directory.
-    *   The project uses a Test-Driven Development (TDD) approach.
 *   **File Naming:** Converted files will be prefixed with `z_` and handle naming conflicts with numeric suffixes, as specified in the implementation plan.
 
 ## Development Cycle
