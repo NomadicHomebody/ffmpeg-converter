@@ -158,7 +158,7 @@ This guide provides a step-by-step checklist for implementing the FFMPEG Bulk Co
         - [x] **Standardized Log Structure/Formatting:** Standardized the log string outputs such that there is consistence spacing between key aspects of each log event (timestamp, message, etc). This should greatly improve the ease at which user's can parse the log messages
         - [x] **Color Coded Logs to Enhance Ease of Parsing Logs:** Standardize the log string output colorings based on the aspect of the log message (timestamp, message, etc) as well as the message type (error, info, warning, success, etc)
 
-- [ ] **Documentation & Config Updates**
-    - [ ] **README Updates:** Update the root level README file as needed to reflect all of the new files/changes made that have yet to be accounted for in the doc. 
-    - [ ] **Creation of `bitrate_configs` folder README:** Ensure guidance on how to run the new `generate_bitrate_configs.py` is added as well as an explanation for how each of the bitrate_config json files is structured/how they work.
-        - [ ] Tweak the logic in `generate_bitrate_configs.py` to be easy to use for generating new files and ensure the newly created README reflects appropriate usage
+- [x] **Documentation & Config Updates**
+    - [x] **README Updates:** Update the root level README file as needed to reflect all of the new files/changes made that have yet to be accounted for in the doc. 
+    - [x] **Creation of `bitrate_configs` folder README file:** Ensure guidance on how to run the new `generate_bitrate_configs.py` is added as well as an explanation for how each of the bitrate_config json files is structured/how they work.
+        - [x] Tweak the logic in `generate_bitrate_configs.py` to be easy to use for generating new files and ensure the newly created README reflects appropriate usage
