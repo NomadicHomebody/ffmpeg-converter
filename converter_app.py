@@ -38,7 +38,7 @@ class ConverterApp(ttk.Frame):
         # Video Codec
         ttk.Label(options_frame, text="Video Codec:").grid(row=0, column=0, sticky=tk.W)
         self.video_codec = tk.StringVar(value="hevc_nvenc")
-        video_codecs = ["hevc_nvenc", "h264_nvenc", "av1", "h264", "h265"]
+        video_codecs = ["hevc_nvenc", "h264_nvenc", "av1_nvenc", "av1", "h264", "h265"]
         ttk.Combobox(options_frame, textvariable=self.video_codec, values=video_codecs, state="readonly").grid(row=0, column=1, sticky="ew")
 
         # Audio Codec
