@@ -68,4 +68,18 @@ This plan outlines the development of a Python-based GUI tool for bulk video con
 5.  **Phase 5: Refinements:**
     *   Add more advanced features like preset management, drag-and-drop, etc.
     *   Improve error handling and user feedback.
-, 
+
+## 6. Enhancements
+
+1. **Intelligent Bitrate Option**
+    * Add new bitrate option in GUI named "optimized" that supports new logic
+    * Core Logic: Based on input file's video codec, bitrate and resolution. Map to an appropriate bitrate of the set output codec that optimizes the compromise between quality and file size. Use the appropriate logical data structure to store these mappings. This logic should execute when the "optimized" bitrate value is selected in the GUI.
+    * Research as needed to get the context required to handle file conversions for 1080p/4k resolution videos and mapping between the codecs H264, HVENC, and AV1 (get all other formats listed in the supported formats if possible)
+2. **Concurrency**
+    * Add new integer incrementer value in the GUI (has buttons to increase/decrease value by 1) that maps to the supported number of concurrent/parallel ffmpeg file conversions to process
+    * Enhance the app to support concurrent executions of the ffmpeg file conversions required for processing all of the files in the input folder. The value provided in the GUI should set the limit to concurrent executions of ffmpeg that are supported.
+3. **Enhanced Progress Reporting & Logging**
+    * Enhance the current logging to extract an estimated time remaining value for completing the processing of all files
+    * Provide more logging output from the actual underlying ffmpeg executions (verbose mode) if needed
+4. **App Experience**
+    * Improve the app window experience to support dynamic scaling based on window size
