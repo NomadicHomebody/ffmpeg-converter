@@ -143,11 +143,11 @@ This guide provides a step-by-step checklist for implementing the FFMPEG Bulk Co
         - [x] **Core Logic (`converter_app.py`):** Implement functionality to save the log area content to a `.txt` file upon button click.
         - [x] **GUI**: Also log the output file's expected bitrate/resolution/file type/codec details for each conversion done
         - [x] **Core Logic (`converter_app.py` / `conversion_logic.py`):** Report the actual bitrate value/resolution/file type/codec details being set for each output file not the values passed in from the GUI. That way the user can know exactly the expected quality of the video should be.
-    - [ ] **Expand Bitrate Config Options:** 
-        - [ ] **GUI**: Add a dropdown toggle for different bitrate configs to choose from that will pulli in the corresponding bitrate_config.json file with the bitrate map based on what is selected from the dropdown in the GUI (i.e. max quality, high quality, balanced quality, low quality, min quality)
-        - [ ] **Core Logic (`converter_app.py` / `conversion_logic.py`):** Create a directory to store all bitrate config json files in `bitrate_configs`. Then based on the value selected in the GUI pull in the corresponding bitrate_config.json file to use for configuring values for the optimized bitrate setting
-            - [ ] Create a bitrate config json file/mapping that corresponds to each of the following quality levels: max quality, high quality, balanced quality, low quality, min quality.
-            - [ ] Use the pre-existing config file as the reference for high quality and then scale it up/down to meet the higher or lower quality expectations of all the other required bitrate config json files.
+    - [x] **Expand Bitrate Config Options:** 
+        - [x] **GUI**: Add a dropdown toggle for different bitrate configs to choose from that will pulli in the corresponding bitrate_config.json file with the bitrate map based on what is selected from the dropdown in the GUI (i.e. max quality, high quality, balanced quality, low quality, min quality)
+        - [x] **Core Logic (`converter_app.py` / `conversion_logic.py`):** Create a directory to store all bitrate config json files in `bitrate_configs`. Then based on the value selected in the GUI pull in the corresponding bitrate_config.json file to use for configuring values for the optimized bitrate setting
+            - [x] Create a bitrate config json file/mapping that corresponds to each of the following quality levels: max quality, high quality, balanced quality, low quality, min quality.
+            - [x] Use the pre-existing config file as the reference for high quality and then scale it up/down to meet the higher or lower quality expectations of all the other required bitrate config json files.
 
 - [x] **App Experience & UI Scaling**
     - [x] **Implement Dynamic Window Resizing:**
@@ -159,3 +159,6 @@ This guide provides a step-by-step checklist for implementing the FFMPEG Bulk Co
         - [x] **Color Coded Logs to Enhance Ease of Parsing Logs:** Standardize the log string output colorings based on the aspect of the log message (timestamp, message, etc) as well as the message type (error, info, warning, success, etc)
 
 - [ ] **Documentation & Config Updates**
+    - [ ] **README Updates:** Update the root level README file as needed to reflect all of the new files/changes made that have yet to be accounted for in the doc. 
+    - [ ] **Creation of `bitrate_configs` folder README:** Ensure guidance on how to run the new `generate_bitrate_configs.py` is added as well as an explanation for how each of the bitrate_config json files is structured/how they work.
+        - [ ] Tweak the logic in `generate_bitrate_configs.py` to be easy to use for generating new files and ensure the newly created README reflects appropriate usage

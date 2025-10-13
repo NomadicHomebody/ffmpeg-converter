@@ -2,15 +2,24 @@ import os
 import subprocess
 import json
 
-# Load OPTIMIZED_BITRATE_MAP from a configuration file
 OPTIMIZED_BITRATE_MAP = {}
-try:
-    with open("bitrate_config.json", "r") as f:
-        OPTIMIZED_BITRATE_MAP = json.load(f)
-except FileNotFoundError:
-    print("Error: bitrate_config.json not found. Optimized bitrate feature will be unavailable.")
-except json.JSONDecodeError:
-    print("Error: Could not decode bitrate_config.json. Check file format.")
+
+def load_optimized_bitrate_map(quality_profile: str) -> dict:
+    global OPTIMIZED_BITRATE_MAP
+    file_name = quality_profile.lower().replace(" ", "_") + ".json"
+    config_path = os.path.join("bitrate_configs", file_name)
+    try:
+        with open(config_path, "r") as f:
+            OPTIMIZED_BITRATE_MAP = json.load(f)
+        return OPTIMIZED_BITRATE_MAP
+    except FileNotFoundError:
+        print(f"Error: Bitrate config file not found: {config_path}. Optimized bitrate feature may be unavailable or use default.")
+        OPTIMIZED_BITRATE_MAP = {}
+        return {}
+    except json.JSONDecodeError:
+        print(f"Error: Could not decode bitrate config file: {config_path}. Check file format.")
+        OPTIMIZED_BITRATE_MAP = {}
+        return {}
 
 def find_video_files(directory: str) -> list[str]:
     """

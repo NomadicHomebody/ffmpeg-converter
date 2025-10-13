@@ -8,7 +8,7 @@ import concurrent.futures
 import functools
 import time
 
-from conversion_logic import find_video_files, build_ffmpeg_command, execute_ffmpeg_command, get_output_filepath, get_file_details
+from conversion_logic import find_video_files, build_ffmpeg_command, execute_ffmpeg_command, get_output_filepath, get_file_details, load_optimized_bitrate_map
 
 class ConverterApp(ttk.Frame):
     def __init__(self, master):
@@ -69,28 +69,34 @@ class ConverterApp(ttk.Frame):
         bitrates = ["dynamic", "optimized"] + [f"{i}M" for i in range(5, 251, 5)]
         ttk.Combobox(options_frame, textvariable=self.video_bitrate, values=bitrates, state="readonly").grid(row=3, column=1, sticky="ew")
 
+        # Bitrate Quality Profile
+        ttk.Label(options_frame, text="Bitrate Quality Profile:").grid(row=4, column=0, sticky=tk.W)
+        self.bitrate_quality_profile = tk.StringVar(value="Balanced Quality")
+        quality_profiles = ["Max Quality", "High Quality", "Balanced Quality", "Low Quality", "Min Quality"]
+        ttk.Combobox(options_frame, textvariable=self.bitrate_quality_profile, values=quality_profiles, state="readonly").grid(row=4, column=1, sticky="ew")
+
         # Delete input file checkbox
         self.delete_input = tk.BooleanVar()
-        ttk.Checkbutton(options_frame, text="Delete input files after successful conversion", variable=self.delete_input).grid(row=4, column=0, columnspan=2, sticky=tk.W)
+        ttk.Checkbutton(options_frame, text="Delete input files after successful conversion", variable=self.delete_input).grid(row=5, column=0, columnspan=2, sticky=tk.W)
 
         # Fallback Bitrate
-        ttk.Label(options_frame, text="Fallback Bitrate (if dynamic fails):").grid(row=5, column=0, sticky=tk.W)
+        ttk.Label(options_frame, text="Fallback Bitrate (if dynamic fails):").grid(row=6, column=0, sticky=tk.W)
         self.fallback_bitrate = tk.StringVar(value="20M")
-        ttk.Entry(options_frame, textvariable=self.fallback_bitrate).grid(row=5, column=1, sticky="ew")
+        ttk.Entry(options_frame, textvariable=self.fallback_bitrate).grid(row=6, column=1, sticky="ew")
 
         # Cap dynamic bitrate checkbox
         self.cap_dynamic_bitrate = tk.BooleanVar()
-        ttk.Checkbutton(options_frame, text="Cap dynamic bitrate at fallback bitrate", variable=self.cap_dynamic_bitrate).grid(row=6, column=0, columnspan=2, sticky=tk.W)
+        ttk.Checkbutton(options_frame, text="Cap dynamic bitrate at fallback bitrate", variable=self.cap_dynamic_bitrate).grid(row=7, column=0, columnspan=2, sticky=tk.W)
 
         # Concurrent Conversions
-        ttk.Label(options_frame, text="Concurrent Conversions:").grid(row=7, column=0, sticky=tk.W)
+        ttk.Label(options_frame, text="Concurrent Conversions:").grid(row=8, column=0, sticky=tk.W)
         self.concurrent_conversions = tk.IntVar(value=2)
         self.concurrent_conversions_spinbox = ttk.Spinbox(options_frame, from_=1, to=32, textvariable=self.concurrent_conversions, state="readonly")
-        self.concurrent_conversions_spinbox.grid(row=7, column=1, sticky="ew")
+        self.concurrent_conversions_spinbox.grid(row=8, column=1, sticky="ew")
 
         # Verbose Logging
         self.verbose_logging = tk.BooleanVar(value=False)
-        ttk.Checkbutton(options_frame, text="Enable Verbose Logging", variable=self.verbose_logging).grid(row=8, column=0, columnspan=2, sticky=tk.W)
+        ttk.Checkbutton(options_frame, text="Enable Verbose Logging", variable=self.verbose_logging).grid(row=9, column=0, columnspan=2, sticky=tk.W)
 
         # Progress and Log frame
         progress_log_frame = ttk.LabelFrame(self, text="Progress and Log", padding="10")
@@ -175,6 +181,7 @@ class ConverterApp(ttk.Frame):
             self.video_codec.get(),
             self.audio_codec.get(),
             self.video_bitrate.get(),
+            self.bitrate_quality_profile.get(), # Pass bitrate_quality_profile
             self.output_format.get(),
             self.delete_input.get(),
             self.fallback_bitrate.get(),
@@ -203,7 +210,10 @@ class ConverterApp(ttk.Frame):
                 self.progress_queue.put(("log", ("warning", f"Terminating conversion for {video_file}.")))
         self.current_processes.clear() # Clear the dictionary after attempting to terminate all processes
 
-    def _conversion_worker(self, input_dir, output_dir, video_codec, audio_codec, video_bitrate, output_format, delete_input, fallback_bitrate, cap_dynamic_bitrate, concurrent_conversions, start_time, verbose_logging):
+    def _conversion_worker(self, input_dir, output_dir, video_codec, audio_codec, video_bitrate, bitrate_quality_profile, output_format, delete_input, fallback_bitrate, cap_dynamic_bitrate, concurrent_conversions, start_time, verbose_logging):
+
+        # Load the appropriate optimized bitrate map based on user selection
+        load_optimized_bitrate_map(bitrate_quality_profile)
 
         if not input_dir or not output_dir:
             self.progress_queue.put(("log", ("error", "Error: Input and output folders must be selected.")))
