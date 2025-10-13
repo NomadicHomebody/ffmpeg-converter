@@ -1,87 +1,58 @@
-# GEMINI Project Context: ffmpeg-converter
+# Project: FFMPEG Bulk Converter GUI
 
 ## Project Overview
 
-This project is a Python-based command-line interface (CLI) tool for bulk converting video files from `.mkv` to `.mp4` format. It is optimized for compatibility with Jellyfin media servers. The tool uses `ffmpeg` for the conversion process.
+This project aims to build a Python-based GUI tool for bulk video conversion using the `ffmpeg` command-line tool. The application will allow users to select a folder of videos and convert them to a specified format, codec, and bitrate.
 
-The project includes a main conversion script, a separate GUI progress window, and a suite of unit tests.
+The project is currently in the development phase, following a detailed plan outlined in `cleanBulkConverterPlan.md` and `cleanBulkConverterImpGuide.md`.
 
-### Key Technologies
-- **Language:** Python 3.8+
-- **CLI Framework:** `click`
-- **GUI:** `PySide6`
-- **Logging:** `structlog`
-- **Progress Bar:** `tqdm`
-- **Testing:** `pytest`
+**Key Technologies:**
+*   **Language:** Python
+*   **GUI Framework:** Tkinter
+*   **Testing:** pytest (inferred from `.pytest_cache`)
 
-### Architecture
-The application is composed of two main parts:
-1.  `mkv_mp4_bulk_converter.py`: The core CLI application that handles file discovery, `ffmpeg` command execution, and progress reporting.
-2.  `progress_window.py`: A standalone GUI window that displays conversion progress. It communicates with the main script over a TCP socket.
+**Architecture:**
+The application is designed with a separation of concerns:
+*   **`converter_app.py`**: Main application entry point and GUI logic.
+*   **`conversion_logic.py`**: Core business logic for handling `ffmpeg` conversions.
 
 ## Building and Running
 
-### 1. Environment Setup
-It is recommended to use a Python virtual environment.
-
-```bash
-# Create a virtual environment
-python -m venv .venv
-
-# Activate the environment
-# On Windows (PowerShell)
-.\.venv\Scripts\Activate.ps1
-# On macOS/Linux
-source .venv/bin/activate
-```
-
-### 2. Install Dependencies
-Install the required Python packages from `requirements.txt`.
-
+**1. Setup:**
+Install the required Python dependencies.
 ```bash
 pip install -r requirements.txt
 ```
+*Note: `requirements.txt` is currently empty. It should be populated with dependencies like `pytest`.*
 
-### 3. Running the Application
-The main script is `mkv_mp4_bulk_converter.py`.
-
-**Basic Usage:**
+**2. Running the Application:**
 ```bash
-python mkv_mp4_bulk_converter.py <path_to_folder_with_mkv_files>
+python converter_app.py
 ```
+*Note: `converter_app.py` has not been created yet.*
 
-**With Terminal Progress:**
-```bash
-python mkv_mp4_bulk_converter.py <path_to_folder> --progress
-```
-
-**With GUI Progress Window:**
-You need to run two separate processes.
-
-First, start the progress window:
-```bash
-python progress_window.py
-```
-
-Then, run the converter with the `--progress-window` flag:
-```bash
-python mkv_mp4_bulk_converter.py <path_to_folder> --progress-window
-```
-
-## Development Conventions
-
-### Testing
-The project uses `pytest` for unit testing. Tests are located in the `test/` directory.
-
-To run the tests:
+**3. Running Tests:**
+The project uses `pytest` for testing.
 ```bash
 pytest
 ```
 
-### Logging
-The application uses `structlog` for structured, JSON-formatted logs. This allows for more detailed and machine-readable log output.
+## Development Conventions
 
-### Coding Style
-- The code follows standard Python conventions (PEP 8).
-- Functions are type-hinted.
-- The project uses `click` for creating a clean and well-documented CLI.
+*   **Workflow:** The project follows a structured development process, starting with planning (`.md` files) before implementation.
+*   **Code Style:** Follow standard Python conventions (PEP 8).
+*   **Testing:**
+    *   Tests are located in the `test/` directory.
+    *   The project uses a Test-Driven Development (TDD) approach.
+*   **File Naming:** Converted files will be prefixed with `z_` and handle naming conflicts with numeric suffixes, as specified in the implementation plan.
+
+## Development Cycle
+
+Our development process will be guided by the `cleanBulkConverterImpGuide.md` file. I will work through the checklist in the implementation guide, one task at a time.
+
+For each task, I will:
+1.  Implement the required functionality.
+2.  Create or update tests to validate the implementation.
+3.  Mark the task as complete in `cleanBulkConverterImpGuide.md`.
+4.  Provide a summary of the changes made.
+5.  Ask for your approval before proceeding to the next task.
