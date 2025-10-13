@@ -71,15 +71,60 @@ This plan outlines the development of a Python-based GUI tool for bulk video con
 
 ## 6. Enhancements
 
-1. **Intelligent Bitrate Option**
-    * Add new bitrate option in GUI named "optimized" that supports new logic
-    * Core Logic: Based on input file's video codec, bitrate and resolution. Map to an appropriate bitrate of the set output codec that optimizes the compromise between quality and file size. Use the appropriate logical data structure to store these mappings. This logic should execute when the "optimized" bitrate value is selected in the GUI.
-    * Research as needed to get the context required to handle file conversions for 1080p/4k resolution videos and mapping between the codecs H264, HVENC, and AV1 (get all other formats listed in the supported formats if possible)
-2. **Concurrency**
-    * Add new integer incrementer value in the GUI (has buttons to increase/decrease value by 1) that maps to the supported number of concurrent/parallel ffmpeg file conversions to process
-    * Enhance the app to support concurrent executions of the ffmpeg file conversions required for processing all of the files in the input folder. The value provided in the GUI should set the limit to concurrent executions of ffmpeg that are supported.
-3. **Enhanced Progress Reporting & Logging**
-    * Enhance the current logging to extract an estimated time remaining value for completing the processing of all files
-    * Provide more logging output from the actual underlying ffmpeg executions (verbose mode) if needed
-4. **App Experience**
-    * Improve the app window experience to support dynamic scaling based on window size
+### 6.1. Intelligent Bitrate Controls
+
+1.  **"Optimized" Bitrate Option:**
+    *   **GUI:** The bitrate dropdown will include a new option named "Optimized".
+    *   **Core Logic:** When "Optimized" is selected, the application will determine the output bitrate based on the input file's resolution, video codec, and the selected output codec.
+    *   **Research & Mapping:** The logic will use a predefined mapping table covering common codecs (H.264, HEVC, AV1, etc.) and resolutions (720p, 1080p, 1440p, 4k).
+    *   **Mapping Data Structure:** A dictionary or similar structure will store these mappings, for example:
+        ```
+        # Example Bitrate Mapping
+        {
+            "720p": {
+                "h264": {"hevc": "4Mbps", "av1": "3Mbps"},
+                "hevc": {"h264": "6Mbps", "av1": "3.5Mbps"}
+            },
+            "1080p": {
+                "h264": {"hevc": "8Mbps", "av1": "6Mbps"},
+                "hevc": {"h264": "12Mbps", "av1": "7Mbps"}
+            },
+            "1440p": {
+                "h264": {"hevc": "16Mbps", "av1": "12Mbps"},
+                "hevc": {"h264": "24Mbps", "av1": "14Mbps"}
+            },
+            "4k": {
+                "h264": {"hevc": "25Mbps", "av1": "20Mbps"},
+                "hevc": {"h264": "35Mbps", "av1": "22Mbps"}
+            }
+        }
+        ```
+
+2.  **Fallback Bitrate:**
+    *   **GUI:** A new input field, labeled "Fallback Bitrate (Mbps)", will be added. It will default to `20`.
+    *   **Core Logic:** If the "Optimized" option is used but no specific mapping is found for an input video, this fallback bitrate will be used for the conversion.
+
+### 6.2. Concurrency Management
+
+1.  **Concurrency Control:**
+    *   **GUI:** An integer input field (e.g., a spinner or text box with +/- buttons) labeled "Concurrent Conversions" will be added.
+    *   **Settings:** The value will default to `2`, with a minimum of `1` and a maximum of `32`.
+    *   **Core Logic:** The application will manage a pool of background workers to execute `ffmpeg` conversions in parallel, up to the limit set by this value.
+
+2.  **Error Handling:**
+    *   **Core Logic:** If a conversion fails within a concurrent batch, the error will be logged, but the application will continue processing the remaining files in the queue. The overall process will not be halted by a single file's failure.
+
+### 6.3. Enhanced Progress Reporting & Logging
+
+1.  **Estimated Time Remaining (ETA):**
+    *   **GUI:** A label will display the estimated time remaining to complete the entire batch.
+    *   **Core Logic:** The ETA will be calculated using a simple averaging method: `(Average time per completed file) * (Number of remaining files)`. The estimate will update as each file is completed.
+
+2.  **Verbose Logging & Export:**
+    *   **GUI:** A checkbox labeled "Enable Verbose Logging" will be added. When checked, the log area will display more detailed output from the underlying `ffmpeg` processes.
+    *   **GUI:** A button labeled "Save Log" will be added. Clicking this will prompt the user to save the contents of the log area to a `.txt` file.
+
+### 6.4. App Experience & UI Scaling
+
+*   **Dynamic Layout:** The application window will support dynamic resizing.
+*   **Element Behavior:** When the window is resized, the log/status area will be the primary element that expands to fill the new available space. The control/options panel may adjust its size slightly to maintain a balanced and professional appearance.
