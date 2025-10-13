@@ -63,6 +63,11 @@ class ConverterApp(ttk.Frame):
         self.delete_input = tk.BooleanVar()
         ttk.Checkbutton(options_frame, text="Delete input files after successful conversion", variable=self.delete_input).grid(row=4, column=0, columnspan=2, sticky=tk.W)
 
+        # Fallback Bitrate
+        ttk.Label(options_frame, text="Fallback Bitrate (if dynamic fails):").grid(row=5, column=0, sticky=tk.W)
+        self.fallback_bitrate = tk.StringVar(value="20M")
+        ttk.Entry(options_frame, textvariable=self.fallback_bitrate).grid(row=5, column=1, sticky="ew")
+
         # Progress and Log frame
         progress_log_frame = ttk.LabelFrame(self, text="Progress and Log", padding="10")
         progress_log_frame.grid(row=2, column=0, columnspan=2, sticky="nsew")
@@ -74,6 +79,9 @@ class ConverterApp(ttk.Frame):
 
         self.progress_bar = ttk.Progressbar(progress_log_frame, orient="horizontal", mode="determinate")
         self.progress_bar.grid(row=1, column=0, sticky="ew")
+
+        # Clear Log button
+        ttk.Button(progress_log_frame, text="Clear Log", command=self._clear_log).grid(row=2, column=0, sticky=tk.E)
 
         # Start button
         self.start_button = ttk.Button(self, text="Start Conversion", command=self._start_conversion)
@@ -96,6 +104,9 @@ class ConverterApp(ttk.Frame):
             if isinstance(widget, (ttk.Button, ttk.Entry, ttk.Combobox)):
                 widget.config(state=tk.NORMAL if enabled else tk.DISABLED)
 
+    def _clear_log(self):
+        self.log_area.delete("1.0", tk.END)
+
     def _start_conversion(self):
         self._toggle_widgets(False)
         self.cancel_button.config(state=tk.NORMAL)
@@ -110,6 +121,7 @@ class ConverterApp(ttk.Frame):
             self.video_bitrate.get(),
             self.output_format.get(),
             self.delete_input.get(),
+            self.fallback_bitrate.get(),
         )
 
         self.thread = threading.Thread(target=self._conversion_worker, args=args)
@@ -124,9 +136,11 @@ class ConverterApp(ttk.Frame):
 
 
     def _cancel_conversion(self):
+        if hasattr(self, 'process') and self.process.poll() is None:
+            self.process.terminate()
         self.cancel_event.set()
 
-    def _conversion_worker(self, input_dir, output_dir, video_codec, audio_codec, video_bitrate, output_format, delete_input):
+    def _conversion_worker(self, input_dir, output_dir, video_codec, audio_codec, video_bitrate, output_format, delete_input, fallback_bitrate):
 
         if not input_dir or not output_dir:
             self.progress_queue.put(("log", "Error: Input and output folders must be selected.\n"))
@@ -152,10 +166,16 @@ class ConverterApp(ttk.Frame):
                 video_codec,
                 audio_codec,
                 video_bitrate,
+                fallback_bitrate,
             )
             self.progress_queue.put(("log", f"Converting {video_file} to {output_filepath}...\n"))
-            try:
-                execute_ffmpeg_command(command)
+            self.process = execute_ffmpeg_command(command)
+            stdout, stderr = self.process.communicate()
+
+            if self.cancel_event.is_set():
+                return
+
+            if self.process.returncode == 0:
                 self.progress_queue.put(("log", "Conversion successful.\n"))
                 if delete_input:
                     try:
@@ -163,8 +183,8 @@ class ConverterApp(ttk.Frame):
                         self.progress_queue.put(("log", f"Deleted input file: {video_file}\n"))
                     except OSError as e:
                         self.progress_queue.put(("log", f"Error deleting file {video_file}: {e}\n"))
-            except Exception as e:
-                self.progress_queue.put(("log", f"Error converting {video_file}: {e}\n"))
+            else:
+                self.progress_queue.put(("log", f"Error converting {video_file}: {stderr}\n"))
             
             self.progress_queue.put(("progress", i + 1))
 

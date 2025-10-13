@@ -61,6 +61,7 @@ def build_ffmpeg_command(
     video_codec: str,
     audio_codec: str,
     video_bitrate: str,
+    fallback_bitrate: str,
 ) -> list[str]:
     """
     Constructs the ffmpeg command as a list of strings.
@@ -92,6 +93,8 @@ def build_ffmpeg_command(
         bitrate = get_video_bitrate(input_file)
         if bitrate:
             command.extend(["-b:v", bitrate])
+        else:
+            command.extend(["-b:v", fallback_bitrate])
     else:
         command.extend(["-b:v", video_bitrate])
 
@@ -100,19 +103,17 @@ def build_ffmpeg_command(
     return command
 
 
-def execute_ffmpeg_command(command: list[str]):
+def execute_ffmpeg_command(command: list[str]) -> subprocess.Popen:
     """
     Executes an ffmpeg command.
 
     Args:
         command: The ffmpeg command to execute, as a list of strings.
+    
+    Returns:
+        The Popen object for the running process.
     """
-    try:
-        subprocess.run(command, check=True, capture_output=True, text=True)
-    except subprocess.CalledProcessError as e:
-        # Handle errors, e.g., log them
-        print(f"Error during conversion: {e.stderr}")
-        raise
+    return subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
 
 
 def get_output_filepath(input_file: str, output_dir: str, output_format: str) -> str:
