@@ -62,6 +62,7 @@ def build_ffmpeg_command(
     audio_codec: str,
     video_bitrate: str,
     fallback_bitrate: str,
+    cap_dynamic_bitrate: bool,
 ) -> list[str]:
     """
     Constructs the ffmpeg command as a list of strings.
@@ -92,6 +93,14 @@ def build_ffmpeg_command(
     if video_bitrate == "dynamic":
         bitrate = get_video_bitrate(input_file)
         if bitrate:
+            if cap_dynamic_bitrate:
+                try:
+                    dynamic_bitrate_int = int(bitrate)
+                    fallback_bitrate_int = int(fallback_bitrate.upper().replace("M", "000000").replace("K", "000"))
+                    if dynamic_bitrate_int > fallback_bitrate_int:
+                        bitrate = fallback_bitrate
+                except ValueError:
+                    pass  # Could not convert bitrates to int for comparison
             command.extend(["-b:v", bitrate])
         else:
             command.extend(["-b:v", fallback_bitrate])

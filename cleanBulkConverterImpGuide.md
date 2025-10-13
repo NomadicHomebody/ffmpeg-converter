@@ -82,7 +82,10 @@ This guide provides a step-by-step checklist for implementing the FFMPEG Bulk Co
 
 - [x] **Dynamic Bitrate Fallback**
     - [x] Add a new entry field to the GUI for a fallback bitrate.
-    - [x] In `conversion_logic.py`, when "dynamic" bitrate is selected and `get_video_bitrate` returns `None`, use the fallback bitrate.
+    - [x] Add a checkbox to cap the dynamic bitrate at the fallback bitrate.
+    - [x] In `conversion_logic.py`, when "dynamic" bitrate is selected:
+        - [x] If the dynamic bitrate is higher than the fallback bitrate and the cap is enabled, use the fallback bitrate.
+        - [x] If `get_video_bitrate` returns `None`, use the fallback bitrate.
 - [x] **Clear Log Button**
     - [x] Add a "Clear Log" button to the GUI.
     - [x] Implement the logic for the "Clear Log" button to clear the log area.

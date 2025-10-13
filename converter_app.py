@@ -56,7 +56,7 @@ class ConverterApp(ttk.Frame):
         # Video Bitrate
         ttk.Label(options_frame, text="Video Bitrate:").grid(row=3, column=0, sticky=tk.W)
         self.video_bitrate = tk.StringVar(value="dynamic")
-        bitrates = ["dynamic"] + [f"{i}M" for i in range(10, 251, 10)]
+        bitrates = ["dynamic"] + [f"{i}M" for i in range(5, 251, 5)]
         ttk.Combobox(options_frame, textvariable=self.video_bitrate, values=bitrates, state="readonly").grid(row=3, column=1, sticky="ew")
 
         # Delete input file checkbox
@@ -67,6 +67,10 @@ class ConverterApp(ttk.Frame):
         ttk.Label(options_frame, text="Fallback Bitrate (if dynamic fails):").grid(row=5, column=0, sticky=tk.W)
         self.fallback_bitrate = tk.StringVar(value="20M")
         ttk.Entry(options_frame, textvariable=self.fallback_bitrate).grid(row=5, column=1, sticky="ew")
+
+        # Cap dynamic bitrate checkbox
+        self.cap_dynamic_bitrate = tk.BooleanVar()
+        ttk.Checkbutton(options_frame, text="Cap dynamic bitrate at fallback bitrate", variable=self.cap_dynamic_bitrate).grid(row=6, column=0, columnspan=2, sticky=tk.W)
 
         # Progress and Log frame
         progress_log_frame = ttk.LabelFrame(self, text="Progress and Log", padding="10")
@@ -122,6 +126,7 @@ class ConverterApp(ttk.Frame):
             self.output_format.get(),
             self.delete_input.get(),
             self.fallback_bitrate.get(),
+            self.cap_dynamic_bitrate.get(),
         )
 
         self.thread = threading.Thread(target=self._conversion_worker, args=args)
@@ -140,7 +145,7 @@ class ConverterApp(ttk.Frame):
             self.process.terminate()
         self.cancel_event.set()
 
-    def _conversion_worker(self, input_dir, output_dir, video_codec, audio_codec, video_bitrate, output_format, delete_input, fallback_bitrate):
+    def _conversion_worker(self, input_dir, output_dir, video_codec, audio_codec, video_bitrate, output_format, delete_input, fallback_bitrate, cap_dynamic_bitrate):
 
         if not input_dir or not output_dir:
             self.progress_queue.put(("log", "Error: Input and output folders must be selected.\n"))
@@ -167,6 +172,7 @@ class ConverterApp(ttk.Frame):
                 audio_codec,
                 video_bitrate,
                 fallback_bitrate,
+                cap_dynamic_bitrate,
             )
             self.progress_queue.put(("log", f"Converting {video_file} to {output_filepath}...\n"))
             self.process = execute_ffmpeg_command(command)
