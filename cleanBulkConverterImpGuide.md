@@ -142,6 +142,7 @@ This guide provides a step-by-step checklist for implementing the FFMPEG Bulk Co
         - [x] **GUI:** Add a button labeled "Save Log".
         - [x] **Core Logic (`converter_app.py`):** Implement functionality to save the log area content to a `.txt` file upon button click.
         - [x] **GUI**: Also log the output file's expected bitrate/resolution/file type/codec details for each conversion done
+        - [x] **Core Logic (`converter_app.py` / `conversion_logic.py`):** Report the actual bitrate value/resolution/file type/codec details being set for each output file not the values passed in from the GUI. That way the user can know exactly the expected quality of the video should be.
 
 - [ ] **App Experience & UI Scaling**
     - [ ] **Implement Dynamic Window Resizing:**

@@ -106,6 +106,62 @@ def _get_video_details(input_file: str) -> dict | None:
     except (subprocess.CalledProcessError, FileNotFoundError, json.JSONDecodeError):
         return None
 
+def get_file_details(file_path: str) -> dict:
+    """
+    Gets comprehensive details of a media file using ffprobe.
+
+    Args:
+        file_path: The path to the media file.
+
+    Returns:
+        A dictionary containing details like bitrate, resolution, video codec, audio codec, and format.
+        Returns default values if information cannot be retrieved.
+    """
+    details = {
+        "bitrate": "N/A",
+        "resolution": "N/A",
+        "video_codec": "N/A",
+        "audio_codec": "N/A",
+        "format": "N/A",
+    }
+    command = [
+        "ffprobe",
+        "-v",
+        "quiet",
+        "-print_format",
+        "json",
+        "-show_format",
+        "-show_streams",
+        file_path,
+    ]
+    try:
+        result = subprocess.run(command, capture_output=True, text=True, check=True)
+        data = json.loads(result.stdout)
+
+        # Get format details
+        if "format" in data:
+            details["format"] = data["format"].get("format_name", "N/A")
+            bitrate_bps = data["format"].get("bit_rate")
+            if bitrate_bps:
+                details["bitrate"] = f"{int(bitrate_bps) / 1000000:.2f} Mbps"
+
+        # Get stream details
+        for stream in data.get("streams", []):
+            if stream.get("codec_type") == "video":
+                details["video_codec"] = stream.get("codec_name", "N/A")
+                width = stream.get("width")
+                height = stream.get("height")
+                if width and height:
+                    details["resolution"] = f"{width}x{height}"
+            elif stream.get("codec_type") == "audio":
+                details["audio_codec"] = stream.get("codec_name", "N/A")
+                # Assuming one audio stream for simplicity, could be extended for multiple
+
+    except (subprocess.CalledProcessError, FileNotFoundError, json.JSONDecodeError):
+        pass # Return default N/A values on error
+
+    return details
+
 
 def _get_optimized_bitrate(input_file: str, output_video_codec: str, fallback_bitrate: str) -> str:
     """

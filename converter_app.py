@@ -8,7 +8,7 @@ import concurrent.futures
 import functools
 import time
 
-from conversion_logic import find_video_files, build_ffmpeg_command, execute_ffmpeg_command, get_output_filepath
+from conversion_logic import find_video_files, build_ffmpeg_command, execute_ffmpeg_command, get_output_filepath, get_file_details
 
 class ConverterApp(ttk.Frame):
     def __init__(self, master):
@@ -317,6 +317,16 @@ class ConverterApp(ttk.Frame):
             return {"success": False, "error": "Conversion cancelled", "output_filepath": output_filepath}
 
         if process.returncode == 0:
+            actual_details = get_file_details(output_filepath)
+            details_log = (
+                f"  Actual Output Details:\n"
+                f"    Format: {actual_details["format"]}\n"
+                f"    Resolution: {actual_details["resolution"]}\n"
+                f"    Video Codec: {actual_details["video_codec"]}\n"
+                f"    Audio Codec: {actual_details["audio_codec"]}\n"
+                f"    Bitrate: {actual_details["bitrate"]}\n"
+            )
+            self.progress_queue.put(("log", details_log))
             return {"success": True, "output_filepath": output_filepath}
         else:
             return {"success": False, "error": stderr, "output_filepath": output_filepath}
