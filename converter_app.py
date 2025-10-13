@@ -353,6 +353,6 @@ class ConverterApp(ttk.Frame):
 if __name__ == "__main__":
     root = tk.Tk()
     root.title("FFMPEG Bulk Converter")
-    root.geometry("800x600")
+    root.geometry("1000x750")
     app = ConverterApp(root)
     root.mainloop()
