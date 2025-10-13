@@ -3,6 +3,7 @@ from tkinter import ttk, filedialog, messagebox
 import threading
 import queue
 import shutil
+import os
 
 from conversion_logic import find_video_files, build_ffmpeg_command, execute_ffmpeg_command, get_output_filepath
 
@@ -58,6 +59,10 @@ class ConverterApp(ttk.Frame):
         bitrates = ["dynamic"] + [f"{i}M" for i in range(10, 251, 10)]
         ttk.Combobox(options_frame, textvariable=self.video_bitrate, values=bitrates, state="readonly").grid(row=3, column=1, sticky="ew")
 
+        # Delete input file checkbox
+        self.delete_input = tk.BooleanVar()
+        ttk.Checkbutton(options_frame, text="Delete input files after successful conversion", variable=self.delete_input).grid(row=4, column=0, columnspan=2, sticky=tk.W)
+
         # Progress and Log frame
         progress_log_frame = ttk.LabelFrame(self, text="Progress and Log", padding="10")
         progress_log_frame.grid(row=2, column=0, columnspan=2, sticky="nsew")
@@ -104,6 +109,7 @@ class ConverterApp(ttk.Frame):
             self.audio_codec.get(),
             self.video_bitrate.get(),
             self.output_format.get(),
+            self.delete_input.get(),
         )
 
         self.thread = threading.Thread(target=self._conversion_worker, args=args)
@@ -120,7 +126,7 @@ class ConverterApp(ttk.Frame):
     def _cancel_conversion(self):
         self.cancel_event.set()
 
-    def _conversion_worker(self, input_dir, output_dir, video_codec, audio_codec, video_bitrate, output_format):
+    def _conversion_worker(self, input_dir, output_dir, video_codec, audio_codec, video_bitrate, output_format, delete_input):
 
         if not input_dir or not output_dir:
             self.progress_queue.put(("log", "Error: Input and output folders must be selected.\n"))
@@ -151,6 +157,12 @@ class ConverterApp(ttk.Frame):
             try:
                 execute_ffmpeg_command(command)
                 self.progress_queue.put(("log", "Conversion successful.\n"))
+                if delete_input:
+                    try:
+                        os.remove(video_file)
+                        self.progress_queue.put(("log", f"Deleted input file: {video_file}\n"))
+                    except OSError as e:
+                        self.progress_queue.put(("log", f"Error deleting file {video_file}: {e}\n"))
             except Exception as e:
                 self.progress_queue.put(("log", f"Error converting {video_file}: {e}\n"))
             
