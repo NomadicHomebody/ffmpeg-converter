@@ -66,11 +66,11 @@ class ConverterApp(ttk.Frame):
         # Video Bitrate
         ttk.Label(options_frame, text="Video Bitrate:").grid(row=3, column=0, sticky=tk.W)
         self.video_bitrate = tk.StringVar(value="optimized")
-        bitrates = ["dynamic", "optimized"] + [f"{i}M" for i in range(5, 251, 5)]
+        bitrates = ["dynamic", "optimized"] + [f"{i}M" for i in range(1, 10, 1)] + [f"{i}M" for i in range(10, 251, 5)]
         ttk.Combobox(options_frame, textvariable=self.video_bitrate, values=bitrates, state="readonly").grid(row=3, column=1, sticky="ew")
 
         # Bitrate Quality Profile
-        ttk.Label(options_frame, text="Bitrate Quality Profile:").grid(row=4, column=0, sticky=tk.W)
+        ttk.Label(options_frame, text="Bitrate Quality Profile (optimized): ").grid(row=4, column=0, sticky=tk.W)
         self.bitrate_quality_profile = tk.StringVar(value="Balanced Quality")
         quality_profiles = ["Max Quality", "High Quality", "Balanced Quality", "Low Quality", "Min Quality"]
         ttk.Combobox(options_frame, textvariable=self.bitrate_quality_profile, values=quality_profiles, state="readonly").grid(row=4, column=1, sticky="ew")

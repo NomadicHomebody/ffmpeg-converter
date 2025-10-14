@@ -167,3 +167,17 @@ This guide provides a step-by-step checklist for implementing the FFMPEG Bulk Co
 
 - [x] **Bug Fixes:**
     - [x]  **Core Logic (`converter_app.py` / `conversion_logic.py`):** Improve concurrency logic to better handle cases where there are less files available to convert than the maximum number of concurrent ffmpeg conversions allowed such that we do not see any error errors or attempted conversions whenever the number of files to convert < Concurrent Conversions GUI value.
+
+## Phase 10: Enhancements 2
+
+- [ ] **Intelligent Bitrate Controls v2 - Rounding to nearest resolution**
+    - [ ] **Implement Enhanced "Optimized" Bitrate Selection Logic:**
+        - [ ] **GUI:** Should be no change to the GUI.
+        - [ ] **Core Logic (`conversion_logic.py`):** Enhance the resolution selection logic in _get_video_details() (somewhere probably within lines 100-113) to either round the provided resolution up to the nearest supported resolution (setting a ceiling resolution of whatever is the highest value supported based on the provided bitrate_config map json file) to ensure a proper mapping to a resolution contained in the bitrate_config map json file being used.
+            - [ ] The logic should be totally dynamic and driven off of the bitrate_config map json file rather than hard coding supported resolutions into the conversion_logic app itself
+    - [ ] **Documentation Updates:** Ensure all corresponding markdown files with relevant information are properly updated to reflect the new logic if/when required.
+- [ ] **Concurrency Robustness - Improving Last Files to Process Logic**
+    - [ ] **Implement Enhanced File Processing with Concurrency Logic:**
+        - [ ] **GUI:** Should be no change to the GUI.
+        - [ ] **Core Logic (`conversion_logic.py`, `converter_app.py`):** When need to prevent the error of "Error deleting file ... The process cannot access the file because it is being used by another process" being thrown by ffmpeg. The error seems to be due to one of the parallel concurrent threads attempting to process/delete a file that is already being processed. We need to investigate this issue in the code and build logic to ensure files already in process are not attempted to be processed again by another thread.
+        - [ ] **Task**: Investigate the issue in the code and then update the guide here with proper tasks/steps to remediate the edge case errors and improve the robustness of the app

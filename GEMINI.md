@@ -4,12 +4,13 @@
 
 This project aims to build a Python-based GUI tool for bulk video conversion using the `ffmpeg` command-line tool. The application will allow users to select a folder of videos and convert them to a specified format, codec, and bitrate.
 
-The project is currently in the development phase, following a detailed plan outlined in `cleanBulkConverterPlan.md` and `cleanBulkConverterImpGuide.md`.
+The project is currently in an advanced development phase, following a detailed plan outlined in `cleanBulkConverterPlan.md` and `cleanBulkConverterImpGuide.md`.
 
 **Key Technologies:**
 *   **Language:** Python
 *   **GUI Framework:** Tkinter
-*   **Testing:** pytest (inferred from `.pytest_cache`)
+*   **Testing:** pytest
+*   **Packaging:** PyInstaller
 
 **Architecture:**
 The application is designed with a separation of concerns:
@@ -23,13 +24,11 @@ Install the required Python dependencies.
 ```bash
 pip install -r requirements.txt
 ```
-*Note: `requirements.txt` is currently empty. It should be populated with dependencies like `pytest`.*
 
 **2. Running the Application:**
 ```bash
 python converter_app.py
 ```
-*Note: `converter_app.py` has not been created yet.*
 
 ## Development Conventions
 
@@ -39,7 +38,7 @@ python converter_app.py
 
 ## Development Cycle
 
-Our development process will be guided by the `cleanBulkConverterImpGuide.md` file. I will work through the checklist in the implementation guide, one task at a time.
+Our development process will be guided by the `cleanBulkConverterImpGuide.md` file. I will work through the checklist in the implementation guide, one task at a time. The project is in the final stages of implementation.
 
 For each task, I will:
 1.  Implement the required functionality.
