@@ -175,9 +175,9 @@ This guide provides a step-by-step checklist for implementing the FFMPEG Bulk Co
         - [x] **GUI:** Should be no change to the GUI.
         - [x] **Core Logic (`conversion_logic.py`):** Enhance the resolution selection logic in _get_video_details() (somewhere probably within lines 100-113) to either round the provided resolution up to the nearest supported resolution (setting a ceiling resolution of whatever is the highest value supported based on the provided bitrate_config map json file) to ensure a proper mapping to a resolution contained in the bitrate_config map json file being used.
             - [x] The logic should be totally dynamic and driven off of the bitrate_config map json file rather than hard coding supported resolutions into the conversion_logic app itself
-            - [ ] Log the optimal resolution and bitrate that will be selected so the user can know what to expect as the file is being processed.
+            - [x] Log the input file's original bitrate and video codec as well as the optimal resolution and bitrate that will be selected so the user can know what to expect as the file is being processed.
 - [x] **Concurrency Robustness - Improving Last Files to Process Logic**
     - [x] **Implement Enhanced File Processing with Concurrency Logic:**
         - [x] **GUI:** Should be no change to the GUI.
         - [x] **Core Logic (`converter_app.py`):** Refactor the `_conversion_worker` function to eliminate a race condition. The current implementation submits each file to the thread pool executor twice, causing two threads to compete for the same file. The fix involves removing the redundant submission loop to ensure each file is processed by only a single thread.
-- [ ] **Documentation Updates:** Ensure all corresponding markdown files with relevant information are properly updated to reflect the new logic if/when required.        
+- [x] **Documentation Updates:** Ensure all corresponding markdown files with relevant information are properly updated to reflect the new logic if/when required.        

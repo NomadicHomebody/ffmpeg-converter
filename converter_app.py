@@ -8,7 +8,7 @@ import concurrent.futures
 import functools
 import time
 
-from conversion_logic import find_video_files, build_ffmpeg_command, execute_ffmpeg_command, get_output_filepath, get_file_details, load_optimized_bitrate_map
+from conversion_logic import find_video_files, build_ffmpeg_command, execute_ffmpeg_command, get_output_filepath, get_file_details, load_optimized_bitrate_map, get_video_resolution_for_optimization, get_optimized_bitrate
 
 class ConverterApp(ttk.Frame):
     def __init__(self, master):
@@ -297,6 +297,21 @@ class ConverterApp(ttk.Frame):
         self.progress_queue.put(("conversion_finished", None))
 
     def _convert_single_file(self, video_file, output_dir, video_codec, audio_codec, video_bitrate, output_format, delete_input, fallback_bitrate, cap_dynamic_bitrate, cancel_event, verbose_logging):
+        original_details = get_file_details(video_file)
+        log_message = f"Input: {os.path.basename(video_file)} | Codec: {original_details['video_codec']}, Bitrate: {original_details['bitrate']}"
+        self.progress_queue.put(("log", ("info", log_message)))
+
+        target_bitrate = video_bitrate
+        if video_bitrate == "optimized":
+            optimal_resolution = "N/A"
+            video_details = get_video_resolution_for_optimization(video_file)
+            if video_details:
+                optimal_resolution = video_details.get("resolution", "N/A")
+            
+            target_bitrate = get_optimized_bitrate(video_file, video_codec, fallback_bitrate)
+            log_message = f"Optimized settings: Resolution: {optimal_resolution}, Bitrate: {target_bitrate}"
+            self.progress_queue.put(("log", ("info", log_message)))
+
         output_filepath = get_output_filepath(video_file, output_dir, output_format)
         command = build_ffmpeg_command(
             video_file,
@@ -308,7 +323,7 @@ class ConverterApp(ttk.Frame):
             cap_dynamic_bitrate,
         )
         
-        log_message = f"Converting {video_file} to {output_filepath} with video codec: {video_codec}, audio codec: {audio_codec}, bitrate: {video_bitrate}, format: {output_format}."
+        log_message = f"Converting {os.path.basename(video_file)} to {os.path.basename(output_filepath)} with video codec: {video_codec}, audio codec: {audio_codec}, bitrate: {target_bitrate}, format: {output_format}."
         self.progress_queue.put(("log", ("info", log_message)))
 
         process = execute_ffmpeg_command(command, verbose_logging)

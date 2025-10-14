@@ -73,7 +73,7 @@ def get_video_bitrate(input_file: str) -> str | None:
     except (subprocess.CalledProcessError, FileNotFoundError, json.JSONDecodeError):
         return None
 
-def _get_video_details(input_file: str) -> dict | None:
+def get_video_resolution_for_optimization(input_file: str) -> dict | None:
     """
     Gets video details (resolution, codec) of a video file using ffprobe.
     The resolution is rounded up to the nearest supported resolution in the bitrate map.
@@ -179,7 +179,7 @@ def get_file_details(file_path: str) -> dict:
     return details
 
 
-def _get_optimized_bitrate(input_file: str, output_video_codec: str, fallback_bitrate: str) -> str:
+def get_optimized_bitrate(input_file: str, output_video_codec: str, fallback_bitrate: str) -> str:
     """
     Determines the optimized bitrate based on input video details and a mapping table.
 
@@ -191,7 +191,7 @@ def _get_optimized_bitrate(input_file: str, output_video_codec: str, fallback_bi
     Returns:
         The optimized bitrate as a string (e.g., "5M"), or the fallback bitrate.
     """
-    video_details = _get_video_details(input_file)
+    video_details = get_video_resolution_for_optimization(input_file)
     if not video_details:
         return fallback_bitrate
 
@@ -246,7 +246,7 @@ def build_ffmpeg_command(
     ]
 
     if video_bitrate == "optimized":
-        target_bitrate = _get_optimized_bitrate(input_file, video_codec, fallback_bitrate)
+        target_bitrate = get_optimized_bitrate(input_file, video_codec, fallback_bitrate)
         if cap_dynamic_bitrate:
             try:
                 # Convert to common unit (bits) for comparison

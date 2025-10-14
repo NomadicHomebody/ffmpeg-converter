@@ -31,6 +31,14 @@ The following quality profiles are provided:
 *   `low_quality.json`: A lower quality profile, with further reduced bitrates.
 *   `min_quality.json`: The lowest quality profile, with significantly reduced bitrates (subject to a minimum of 1 Mbps).
 
+## Resolution Matching
+
+When using the "Optimized" bitrate setting, the application will attempt to match the input video's resolution to the resolutions defined in the selected quality profile's JSON file.
+
+If the input video's resolution does not exactly match a resolution in the configuration file, the application will automatically round **up** to the nearest supported resolution. For example, if the supported resolutions are "720p" and "1080p", an input video with a resolution of "900p" will be treated as "1080p" for the purpose of selecting the appropriate bitrate.
+
+If the input video's resolution is higher than the highest resolution defined in the configuration file, the application will use the highest defined resolution.
+
 ## Generating and Customizing Bitrate Profiles
 
 The `generate_bitrate_configs.py` script is used to create and update these JSON configuration files. It uses `high_quality.json` as a base and applies scaling factors to generate the other quality profiles.
