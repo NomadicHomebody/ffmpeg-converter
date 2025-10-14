@@ -230,8 +230,11 @@ class ConverterApp(ttk.Frame):
         self.progress_queue.put(("progress_max", len(video_files)))
         self.total_files_count = len(video_files) # Set total files count here
 
+        # Adjust the number of workers to not exceed the number of files
+        num_workers = min(concurrent_conversions, self.total_files_count)
+
         # Use a ThreadPoolExecutor for concurrent conversions
-        with concurrent.futures.ThreadPoolExecutor(max_workers=concurrent_conversions) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
             # Store futures to track progress and results
             futures = {
                 executor.submit(self._convert_single_file,

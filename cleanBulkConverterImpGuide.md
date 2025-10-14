@@ -162,3 +162,8 @@ This guide provides a step-by-step checklist for implementing the FFMPEG Bulk Co
     - [x] **README Updates:** Update the root level README file as needed to reflect all of the new files/changes made that have yet to be accounted for in the doc. 
     - [x] **Creation of `bitrate_configs` folder README file:** Ensure guidance on how to run the new `generate_bitrate_configs.py` is added as well as an explanation for how each of the bitrate_config json files is structured/how they work.
         - [x] Tweak the logic in `generate_bitrate_configs.py` to be easy to use for generating new files and ensure the newly created README reflects appropriate usage
+
+## Phase 9: Tweaks/Bug Fixes
+
+- [x] **Bug Fixes:**
+    - [x]  **Core Logic (`converter_app.py` / `conversion_logic.py`):** Improve concurrency logic to better handle cases where there are less files available to convert than the maximum number of concurrent ffmpeg conversions allowed such that we do not see any error errors or attempted conversions whenever the number of files to convert < Concurrent Conversions GUI value.
