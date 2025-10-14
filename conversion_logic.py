@@ -198,12 +198,26 @@ def get_optimized_bitrate(input_file: str, output_video_codec: str, fallback_bit
     resolution = video_details.get("resolution")
     input_codec = video_details.get("codec_name")
 
-    if resolution and input_codec and resolution in OPTIMIZED_BITRATE_MAP:
+    def simplify_codec(codec):
+        if not codec:
+            return None
+        if 'h264' in codec:
+            return 'h264'
+        if 'hevc' in codec or 'h265' in codec:
+            return 'hevc'
+        if 'av1' in codec:
+            return 'av1'
+        return codec.split('_')[0]
+
+    simple_input_codec = simplify_codec(input_codec)
+    simple_output_codec = simplify_codec(output_video_codec)
+
+    if resolution and simple_input_codec and resolution in OPTIMIZED_BITRATE_MAP:
         resolution_map = OPTIMIZED_BITRATE_MAP[resolution]
-        if input_codec in resolution_map:
-            codec_map = resolution_map[input_codec]
-            if output_video_codec in codec_map:
-                return codec_map[output_video_codec]
+        if simple_input_codec in resolution_map:
+            codec_map = resolution_map[simple_input_codec]
+            if simple_output_codec in codec_map:
+                return codec_map[simple_output_codec]
 
     return fallback_bitrate
 
