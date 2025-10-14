@@ -138,6 +138,7 @@ class ConverterApp(ttk.Frame):
         self.cancel_button.grid(row=4, column=0, columnspan=2, sticky="ew")
 
         self.conversion_widgets = [self.start_button] + list(self.children.values())
+        self.conversion_start_times = {}
         self.current_processes = {}
 
         self._check_ffmpeg()
@@ -236,29 +237,10 @@ class ConverterApp(ttk.Frame):
         # Use a ThreadPoolExecutor for concurrent conversions
         with concurrent.futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
             # Store futures to track progress and results
-            futures = {
-                executor.submit(self._convert_single_file,
-                                video_file,
-                                output_dir,
-                                video_codec,
-                                audio_codec,
-                                video_bitrate,
-                                output_format,
-                                delete_input,
-                                fallback_bitrate,
-                                cap_dynamic_bitrate,
-                                self.cancel_event,
-                                verbose_logging): video_file
-                for video_file in video_files
-            }
-
-            completed_count = 0
-            self.completed_files_count = 0 # Initialize for ETA calculation
-            self.conversion_start_times = {} # To store start time of each file conversion
-
+            futures = {}
             for video_file in video_files:
                 self.conversion_start_times[video_file] = time.time()
-                futures[executor.submit(self._convert_single_file,
+                future = executor.submit(self._convert_single_file,
                                         video_file,
                                         output_dir,
                                         video_codec,
@@ -269,7 +251,11 @@ class ConverterApp(ttk.Frame):
                                         fallback_bitrate,
                                         cap_dynamic_bitrate,
                                         self.cancel_event,
-                                        verbose_logging)] = video_file
+                                        verbose_logging)
+                futures[future] = video_file
+
+            completed_count = 0
+            self.completed_files_count = 0 # Initialize for ETA calculation
 
             for future in concurrent.futures.as_completed(futures):
                 if self.cancel_event.is_set():

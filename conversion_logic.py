@@ -76,6 +76,7 @@ def get_video_bitrate(input_file: str) -> str | None:
 def _get_video_details(input_file: str) -> dict | None:
     """
     Gets video details (resolution, codec) of a video file using ffprobe.
+    The resolution is rounded up to the nearest supported resolution in the bitrate map.
 
     Args:
         input_file: The path to the input video file.
@@ -101,15 +102,21 @@ def _get_video_details(input_file: str) -> dict | None:
                 height = stream.get("height")
                 codec_name = stream.get("codec_name")
                 if width and height and codec_name:
-                    resolution = ""
-                    if height == 720:
-                        resolution = "720p"
-                    elif height == 1080:
-                        resolution = "1080p"
-                    elif height == 1440:
-                        resolution = "1440p"
-                    elif height == 2160:
-                        resolution = "2160p" # 4K
+                    # Get supported resolutions from the global map
+                    supported_resolutions = sorted([int(r.replace('p', '')) for r in OPTIMIZED_BITRATE_MAP.keys()])
+                    
+                    if not supported_resolutions:
+                        return None # No supported resolutions loaded
+
+                    # Find the best matching resolution
+                    best_res = supported_resolutions[-1] # Default to highest if above all
+                    for res in supported_resolutions:
+                        if height <= res:
+                            best_res = res
+                            break
+                    
+                    resolution = f"{best_res}p"
+                    
                     return {"resolution": resolution, "codec_name": codec_name}
         return None
     except (subprocess.CalledProcessError, FileNotFoundError, json.JSONDecodeError):
