@@ -5,7 +5,7 @@ a = Analysis(
     ['converter_app.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[('bitrate_configs', 'bitrate_configs')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

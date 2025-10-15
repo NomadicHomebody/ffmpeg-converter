@@ -1,13 +1,24 @@
 import os
 import subprocess
 import json
+import sys
 
 OPTIMIZED_BITRATE_MAP = {}
 
+def get_resource_path(relative_path: str) -> str:
+    """
+    Get the absolute path to a resource, works for development and for PyInstaller.
+    """
+    base_path = getattr(sys, '_MEIPASS', os.path.abspath(".")) 
+    return os.path.join(base_path, relative_path)
+
 def load_optimized_bitrate_map(quality_profile: str) -> dict:
+    """
+    Loads the optimized bitrate map from the corresponding JSON file.
+    """
     global OPTIMIZED_BITRATE_MAP
     file_name = quality_profile.lower().replace(" ", "_") + ".json"
-    config_path = os.path.join("bitrate_configs", file_name)
+    config_path = get_resource_path(os.path.join("bitrate_configs", file_name))
     try:
         with open(config_path, "r") as f:
             OPTIMIZED_BITRATE_MAP = json.load(f)
