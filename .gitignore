@@ -56,3 +56,4 @@ test/__pycache__/
 *.pyd
 .Python
 .*/
+.env

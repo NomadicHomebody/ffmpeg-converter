@@ -7,7 +7,7 @@ This document outlines the step-by-step plan to implement the REST API, containe
 - [x] **1.1: Update Dependencies**
   - [x] Add `fastapi`, `uvicorn[standard]`, `structlog`, `asgi-correlation-id`, `pydantic-settings`, and `aiofiles` to `requirements.txt`.
 
-- [ ] **1.2: Create New Project Files**
+- [x] **1.2: Create New Project Files**
   - [ ] Create `api.py` for the FastAPI application.
   - [ ] Create `Dockerfile` for containerization.
   - [ ] Create `docker-compose.yml` for service orchestration.

@@ -46,7 +46,6 @@ test/__pycache__/
 
 # Environment configs (if created)
 .env.local
-.env*
 *.env.local
 .env.*.local
 
