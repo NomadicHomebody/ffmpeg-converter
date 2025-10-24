@@ -41,7 +41,7 @@ def initialize_database():
     conn.commit()
     conn.close()
 
-def create_job(conn: sqlite3.Connection, job_id: uuid.UUID, correlation_id: str) -> Job:
+def create_job(conn: sqlite3.Connection, job_id: uuid.UUID, correlation_id: str | None) -> Job:
     """Creates a new job record in the database."""
     cursor = conn.cursor()
 

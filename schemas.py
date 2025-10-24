@@ -30,3 +30,18 @@ class Job(JobBase):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+class ConversionRequest(BaseModel):
+    """Model for the /convert endpoint request body."""
+    input_directory: str
+    output_directory: str
+    video_codec: str = "hevc_nvenc"
+    audio_codec: str = "aac"
+    output_format: str = "mp4"
+    video_bitrate: str = "optimized"
+    bitrate_quality_profile: str = "Balanced Quality"
+    delete_input_files: bool = False
+    fallback_bitrate: str = "6M"
+    cap_dynamic_bitrate: bool = True
+    concurrent_conversions: int = 2
+    verbose_logging: bool = False

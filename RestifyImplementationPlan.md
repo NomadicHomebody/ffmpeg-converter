@@ -66,13 +66,13 @@ This document outlines the step-by-step plan to implement the REST API, containe
   - [x] This new function will use the database utility functions (`update_job_status`, `log_to_job`) for state management.
   - [x] The existing functions used by the GUI worker will not be modified in a breaking way. Core, stateless utility functions (e.g., `build_ffmpeg_command`) will be shared.
 
-- [ ] **4.2: Implement `POST /convert` Endpoint**
-  - [ ] In `api.py`, create the endpoint. (reference request/resposne structures outlined in RestifyDesign.md)
-  - [ ] Use Pydantic models from `schemas.py` for request body validation.
-  - [ ] Implement the concurrency control logic defined in the design document.
-  - [ ] Create a job record in the database.
-  - [ ] Use FastAPI's `BackgroundTasks` to run the `run_conversion_task` function in the background.
-  - [ ] Return a `202 Accepted` response with the job details.
+- [x] **4.2: Implement `POST /convert` Endpoint**
+  - [x] In `api.py`, create the endpoint. (reference request/resposne structures outlined in RestifyDesign.md)
+  - [x] Use Pydantic models from `schemas.py` for request body validation.
+  - [x] Implement the concurrency control logic defined in the design document.
+  - [x] Create a job record in the database.
+  - [x] Use FastAPI's `BackgroundTasks` to run the `run_conversion_task` function in the background.
+  - [x] Return a `202 Accepted` response with the job details.
 
 - [ ] **4.3: Implement `GET /status/{job_id}` Endpoint**
   - [ ] In `api.py`, create the endpoint. (reference request/resposne structures outlined in RestifyDesign.md)
