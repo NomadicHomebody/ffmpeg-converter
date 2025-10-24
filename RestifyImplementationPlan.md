@@ -95,10 +95,10 @@ This document outlines the step-by-step plan to implement the REST API, containe
 
 ## Phase 5: Dockerization & Deployment
 
-- [ ] **5.1: Create Multi-Stage `Dockerfile`**
-  - [ ] Implement the multi-stage build as designed in `RestifyDesign.md`.
-  - [ ] Ensure `ffmpeg` with NVENC support is correctly copied to the final image.
-  - [ ] Ensure Python dependencies are installed.
+- [x] **5.1: Create Multi-Stage `Dockerfile`**
+  - [x] Implement the multi-stage build as designed in `RestifyDesign.md`.
+  - [x] Ensure `ffmpeg` with NVENC support is correctly copied to the final image.
+  - [x] Ensure Python dependencies are installed.
 
 - [ ] **5.2: Create `docker-compose.yml`**
   - [ ] Implement the `docker-compose.yml` file as designed.
