@@ -74,10 +74,10 @@ This document outlines the step-by-step plan to implement the REST API, containe
   - [x] Use FastAPI's `BackgroundTasks` to run the `run_conversion_task` function in the background.
   - [x] Return a `202 Accepted` response with the job details.
 
-- [ ] **4.3: Implement `GET /status/{job_id}` Endpoint**
-  - [ ] In `api.py`, create the endpoint. (reference request/resposne structures outlined in RestifyDesign.md)
-  - [ ] Fetch the job status from the SQLite database using `get_job`.
-  - [ ] Return the job details in the response, or a `404 Not Found` if the job doesn't exist.
+- [x] **4.3: Implement `GET /status/{job_id}` Endpoint**
+  - [x] In `api.py`, create the endpoint. (reference request/resposne structures outlined in RestifyDesign.md)
+  - [x] Fetch the job status from the SQLite database using `get_job`.
+  - [x] Return the job details in the response, or a `404 Not Found` if the job doesn't exist.
 
 - [ ] **4.4: Implement Optional API Key Authentication**
   - [ ] In a new `security.py` file, create a dependency that checks for the `X-API-Key` header against the `API_KEY` from settings.

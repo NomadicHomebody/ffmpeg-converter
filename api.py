@@ -88,6 +88,20 @@ def create_conversion_job(
     }
 
 
+@app.get("/status/{job_id}", response_model=schemas.Job, tags=["Conversion"])
+def get_job_status(
+    job_id: uuid.UUID,
+    db: sqlite3.Connection = Depends(get_db)
+):
+    """Retrieves the status and details of a specific conversion job."""
+    log.info("Fetching status for job", job_id=str(job_id))
+    job = database.get_job(db, job_id)
+    if job is None:
+        log.warning("Job not found", job_id=str(job_id))
+        raise HTTPException(status_code=404, detail="Job not found")
+    return job
+
+
 @app.get("/health", tags=["Health"])
 def health_check():
     """Performs a health check and returns FFmpeg version."""
