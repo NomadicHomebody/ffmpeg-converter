@@ -79,10 +79,10 @@ This document outlines the step-by-step plan to implement the REST API, containe
   - [x] Fetch the job status from the SQLite database using `get_job`.
   - [x] Return the job details in the response, or a `404 Not Found` if the job doesn't exist.
 
-- [ ] **4.4: Implement Optional API Key Authentication**
-  - [ ] In a new `security.py` file, create a dependency that checks for the `X-API-Key` header against the `API_KEY` from settings.
-  - [ ] The dependency should be optional, disabling auth if `API_KEY` is not set.
-  - [ ] Apply this dependency to the `/convert` and `/status` endpoints.
+- [x] **4.4: Implement Optional API Key Authentication**
+  - [x] In a new `security.py` file, create a dependency that checks for the `X-API-Key` header against the `API_KEY` from settings.
+  - [x] The dependency should be optional, disabling auth if `API_KEY` is not set.
+  - [x] Apply this dependency to the `/convert` and `/status` endpoints.
 
 - [ ] **4.5: Write API Integration Tests**
   - [ ] Create a new `test_api.py` file.
@@ -121,7 +121,7 @@ This document outlines the step-by-step plan to implement the REST API, containe
 - [ ] **6.2: Create `API_DOCUMENTATION.md`**
   - [ ] Create a comprehensive guide that includes:
     - **Local Setup:** How to run the API locally without Docker.
-    - **Docker Deployment:** How to build and run the application with `docker-compose`.
+    - **Docker Deployment:** How to build, use old images, and run the application with `docker-compose`.
     - **Configuration:** How to set environment variables (`API_KEY`, `MAX_CONCURRENT_JOBS`).
     - **API Usage:** Detailed explanation of each endpoint with `curl` examples.
 

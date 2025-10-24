@@ -11,6 +11,7 @@ from logging_config import configure_logging
 import database
 import schemas
 from conversion_logic import run_api_conversion_job, find_video_files
+from security import api_key_auth
 
 # Configure logging and initialize database before starting the app
 configure_logging()
@@ -20,6 +21,7 @@ app = FastAPI(
     title="FFMPEG Bulk Converter API",
     description="An API for bulk video conversion using FFMPEG.",
     version="1.0.0",
+    dependencies=[Depends(api_key_auth)] # Apply auth to all endpoints except where overridden
 )
 
 app.add_middleware(CorrelationIdMiddleware)
@@ -34,7 +36,7 @@ def get_db():
     finally:
         db.close()
 
-@app.get("/")
+@app.get("/", dependencies=[]) # Override global dependency to make this public
 def read_root():
     """A welcome message for the API root."""
     log.info("Root endpoint was hit")
@@ -102,7 +104,7 @@ def get_job_status(
     return job
 
 
-@app.get("/health", tags=["Health"])
+@app.get("/health", tags=["Health"], dependencies=[]) # Override global dependency to make this public
 def health_check():
     """Performs a health check and returns FFmpeg version."""
     try:
