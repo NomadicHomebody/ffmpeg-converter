@@ -34,11 +34,11 @@ This document outlines the step-by-step plan to implement the REST API, containe
 - [x] **2.3: Implement Configuration Management**
   - [x] In `config.py`, create a Pydantic `Settings` class to load `API_KEY` and `MAX_CONCURRENT_JOBS` from environment variables.
 
-- [ ] **2.4: Implement Health Check Endpoint**
-  - [ ] In `api.py`, create the `GET /health` endpoint.
-  - [ ] The endpoint should run `ffmpeg -version` and return the version string in the response.
-  - [ ] It should return a `200 OK` on success and `503 Service Unavailable` on failure.
-  - [ ] **Test:** Manually test the endpoint to confirm it works as expected.
+- [x] **2.4: Implement Health Check Endpoint**
+  - [x] In `api.py`, create the `GET /health` endpoint.
+  - [x] The endpoint should run `ffmpeg -version` and return the version string in the response.
+  - [x] It should return a `200 OK` on success and `503 Service Unavailable` on failure.
+  - [x] **Test:** Manually test the endpoint to confirm it works as expected.
 
 ## Phase 3: Job Persistence with SQLite
 
