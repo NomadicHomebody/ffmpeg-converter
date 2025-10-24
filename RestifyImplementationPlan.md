@@ -23,8 +23,8 @@ This document outlines the step-by-step plan to implement the REST API, containe
 ## Phase 2: Core API Scaffolding & Configuration
 
 - [x] **2.1: Implement Basic FastAPI App**
-  - [ ] In `api.py`, initialize the FastAPI application.
-  - [ ] Add a root `GET /` endpoint that returns a welcome message.
+  - [x] In `api.py`, initialize the FastAPI application.
+  - [x] Add a root `GET /` endpoint that returns a welcome message.
 
 - [ ] **2.2: Implement Logging & Correlation ID**
   - [ ] In a new `logging_config.py`, configure `structlog` for JSON output.
