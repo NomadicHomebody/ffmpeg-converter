@@ -84,9 +84,9 @@ This document outlines the step-by-step plan to implement the REST API, containe
   - [x] The dependency should be optional, disabling auth if `API_KEY` is not set.
   - [x] Apply this dependency to the `/convert` and `/status` endpoints.
 
-- [ ] **4.5: Write API Integration Tests**
-  - [ ] Create a new `test_api.py` file.
-  - [ ] Write integration tests that:
+- [x] **4.5: Write API Integration Tests**
+  - [x] Create a new `test_api.py` file.
+  - [x] Write integration tests that:
     - Call `POST /convert` and verify the response.
     - Call `GET /status/{job_id}` to check for `in_progress` status.
     - (Mock the conversion task) Check for `completed` status.

@@ -9,7 +9,7 @@ import database
 @pytest.fixture
 def test_db(monkeypatch):
     """Fixture to set up an in-memory SQLite database for testing."""
-    conn = sqlite3.connect(":memory:")
+    conn = sqlite3.connect(":memory:", check_same_thread=False)
     conn.row_factory = sqlite3.Row
     
     # Monkeypatch the get_db_connection to return our in-memory connection

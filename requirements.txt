@@ -7,3 +7,4 @@ structlog
 asgi-correlation-id
 pydantic-settings
 aiofiles
+httpx

@@ -21,7 +21,6 @@ app = FastAPI(
     title="FFMPEG Bulk Converter API",
     description="An API for bulk video conversion using FFMPEG.",
     version="1.0.0",
-    dependencies=[Depends(api_key_auth)] # Apply auth to all endpoints except where overridden
 )
 
 app.add_middleware(CorrelationIdMiddleware)
@@ -36,7 +35,7 @@ def get_db():
     finally:
         db.close()
 
-@app.get("/", dependencies=[]) # Override global dependency to make this public
+@app.get("/")
 def read_root():
     """A welcome message for the API root."""
     log.info("Root endpoint was hit")
@@ -47,7 +46,8 @@ def read_root():
 def create_conversion_job(
     request: schemas.ConversionRequest,
     background_tasks: BackgroundTasks,
-    db: sqlite3.Connection = Depends(get_db)
+    db: sqlite3.Connection = Depends(get_db),
+    _: None = Depends(api_key_auth)
 ):
     """Initiates a new video conversion job."""
     job_id = uuid.uuid4()
@@ -93,7 +93,8 @@ def create_conversion_job(
 @app.get("/status/{job_id}", response_model=schemas.Job, tags=["Conversion"])
 def get_job_status(
     job_id: uuid.UUID,
-    db: sqlite3.Connection = Depends(get_db)
+    db: sqlite3.Connection = Depends(get_db),
+    _: None = Depends(api_key_auth)
 ):
     """Retrieves the status and details of a specific conversion job."""
     log.info("Fetching status for job", job_id=str(job_id))
@@ -104,7 +105,7 @@ def get_job_status(
     return job
 
 
-@app.get("/health", tags=["Health"], dependencies=[]) # Override global dependency to make this public
+@app.get("/health", tags=["Health"])
 def health_check():
     """Performs a health check and returns FFmpeg version."""
     try:
