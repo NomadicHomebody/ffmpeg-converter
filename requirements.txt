@@ -1,2 +1,8 @@
 pytest
 pyinstaller
+fastapi
+uvicorn[standard]
+structlog
+asgi-correlation-id
+pydantic-settings
+aiofiles
