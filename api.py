@@ -4,9 +4,11 @@ import structlog
 import subprocess
 
 from logging_config import configure_logging
+from database import initialize_database
 
-# Configure logging before initializing the app
+# Configure logging and initialize database before starting the app
 configure_logging()
+initialize_database()
 
 app = FastAPI(
     title="FFMPEG Bulk Converter API",

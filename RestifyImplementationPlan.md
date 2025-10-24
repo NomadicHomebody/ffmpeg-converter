@@ -42,9 +42,9 @@ This document outlines the step-by-step plan to implement the REST API, containe
 
 ## Phase 3: Job Persistence with SQLite
 
-- [ ] **3.1: Define Database Schema and Models**
-  - [ ] In `database.py`, write a function to initialize the SQLite database and create a `jobs` table. The table should store `job_id`, `status`, `progress`, `logs`, `result`, `created_at`, etc.
-  - [ ] In `schemas.py`, create Pydantic models for `JobCreate`, `Job`, etc.
+- [x] **3.1: Define Database Schema and Models**
+  - [x] In `database.py`, write a function to initialize the SQLite database and create a `jobs` table. The table should store `job_id`, `status`, `progress`, `logs`, `result`, `created_at`, etc.
+  - [x] In `schemas.py`, create Pydantic models for `JobCreate`, `Job`, etc.
 
 - [ ] **3.2: Create Database Utility Functions**
   - [ ] In `database.py`, create CRUD functions:

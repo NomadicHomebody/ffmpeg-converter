@@ -1,0 +1,33 @@
+from pydantic import BaseModel, Field
+from enum import Enum
+from datetime import datetime
+import uuid
+
+class JobStatus(str, Enum):
+    """Enum for job statuses."""
+    PENDING = "pending"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+class JobBase(BaseModel):
+    """Base model for a job."""
+    pass
+
+class JobCreate(JobBase):
+    """Model for creating a new job."""
+    pass
+
+class Job(JobBase):
+    """Model representing a job in the database."""
+    id: uuid.UUID
+    correlation_id: str | None = None
+    status: JobStatus = JobStatus.PENDING
+    progress: float = 0.0
+    logs: list[str] = []
+    result: list[str] | None = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True # Replaces orm_mode in Pydantic v2
