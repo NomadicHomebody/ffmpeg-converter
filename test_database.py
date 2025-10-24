@@ -89,6 +89,22 @@ def test_update_job_status(test_db):
     # Check that the updated_at timestamp has changed
     assert updated_job.updated_at > original_updated_at
 
+def test_update_job_progress(test_db):
+    """Test updating a job's progress."""
+    job_id = uuid.uuid4()
+    correlation_id = "test-update-progress"
+    
+    database.create_job(test_db, job_id, correlation_id)
+
+    # Update progress
+    new_progress = 50.5
+    database.update_job_progress(test_db, job_id, new_progress)
+    
+    updated_job = database.get_job(test_db, job_id)
+    
+    assert updated_job is not None
+    assert updated_job.progress == new_progress
+
 def test_log_to_job(test_db):
     """Test appending log messages to a job."""
     job_id = uuid.uuid4()

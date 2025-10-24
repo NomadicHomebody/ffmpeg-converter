@@ -93,6 +93,13 @@ def update_job_status(conn: sqlite3.Connection, job_id: uuid.UUID, status: JobSt
     cursor.execute("UPDATE jobs SET status = ?, updated_at = ? WHERE id = ?", (status.value, now_iso, str(job_id)))
     conn.commit()
 
+def update_job_progress(conn: sqlite3.Connection, job_id: uuid.UUID, progress: float):
+    """Updates the progress of a job."""
+    cursor = conn.cursor()
+    now_iso = datetime.now(timezone.utc).isoformat()
+    cursor.execute("UPDATE jobs SET progress = ?, updated_at = ? WHERE id = ?", (progress, now_iso, str(job_id)))
+    conn.commit()
+
 def log_to_job(conn: sqlite3.Connection, job_id: uuid.UUID, message: str):
     """Appends a log message to a job's log record."""
     cursor = conn.cursor()

@@ -60,14 +60,14 @@ This document outlines the step-by-step plan to implement the REST API, containe
 
 ## Phase 4: API Endpoint Implementation & Logic
 
-- [ ] **4.1: Refactor `conversion_logic.py` for API Support**
-  - [ ] **CRITICAL:** All changes must be backward-compatible. The existing GUI application (`converter_app.py`) must continue to function without any modification.
-  - [ ] Create a new, separate worker function (e.g., `run_api_conversion_job`) that orchestrates the conversion process specifically for the API.
-  - [ ] This new function will use the database utility functions (`update_job_status`, `log_to_job`) for state management.
-  - [ ] The existing functions used by the GUI worker will not be modified in a breaking way. Core, stateless utility functions (e.g., `build_ffmpeg_command`) will be shared.
+- [x] **4.1: Refactor `conversion_logic.py` for API Support**
+  - [x] **CRITICAL:** All changes must be backward-compatible. The existing GUI application (`converter_app.py`) must continue to function without any modification.
+  - [x] Create a new, separate worker function (e.g., `run_api_conversion_job`) that orchestrates the conversion process specifically for the API.
+  - [x] This new function will use the database utility functions (`update_job_status`, `log_to_job`) for state management.
+  - [x] The existing functions used by the GUI worker will not be modified in a breaking way. Core, stateless utility functions (e.g., `build_ffmpeg_command`) will be shared.
 
 - [ ] **4.2: Implement `POST /convert` Endpoint**
-  - [ ] In `api.py`, create the endpoint.
+  - [ ] In `api.py`, create the endpoint. (reference request/resposne structures outlined in RestifyDesign.md)
   - [ ] Use Pydantic models from `schemas.py` for request body validation.
   - [ ] Implement the concurrency control logic defined in the design document.
   - [ ] Create a job record in the database.
@@ -75,7 +75,7 @@ This document outlines the step-by-step plan to implement the REST API, containe
   - [ ] Return a `202 Accepted` response with the job details.
 
 - [ ] **4.3: Implement `GET /status/{job_id}` Endpoint**
-  - [ ] In `api.py`, create the endpoint.
+  - [ ] In `api.py`, create the endpoint. (reference request/resposne structures outlined in RestifyDesign.md)
   - [ ] Fetch the job status from the SQLite database using `get_job`.
   - [ ] Return the job details in the response, or a `404 Not Found` if the job doesn't exist.
 

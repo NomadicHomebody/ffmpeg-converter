@@ -2,6 +2,7 @@ import os
 import subprocess
 import json
 import sys
+import uuid
 
 OPTIMIZED_BITRATE_MAP = {}
 
@@ -346,3 +347,81 @@ def get_output_filepath(input_file: str, output_dir: str, output_format: str) ->
         counter += 1
 
     return output_filepath
+
+
+def run_api_conversion_job(
+    job_id: uuid.UUID,
+    input_dir: str,
+    output_dir: str,
+    video_codec: str,
+    audio_codec: str,
+    video_bitrate: str,
+    bitrate_quality_profile: str,
+    output_format: str,
+    delete_input: bool,
+    fallback_bitrate: str,
+    cap_dynamic_bitrate: bool,
+    concurrent_conversions: int,
+    verbose_logging: bool,
+):
+    """The main worker function for API-triggered conversion jobs."""
+    from database import get_db_connection, update_job_status, update_job_progress, log_to_job
+    from schemas import JobStatus
+
+    db_conn = get_db_connection()
+    try:
+        log_to_job(db_conn, job_id, "Starting conversion job.")
+        update_job_status(db_conn, job_id, JobStatus.IN_PROGRESS)
+
+        load_optimized_bitrate_map(bitrate_quality_profile)
+        video_files = find_video_files(input_dir)
+
+        if not video_files:
+            log_to_job(db_conn, job_id, "No video files found in the input directory.")
+            update_job_status(db_conn, job_id, JobStatus.COMPLETED)
+            return
+
+        total_files = len(video_files)
+        log_to_job(db_conn, job_id, f"Found {total_files} video files to convert.")
+
+        completed_count = 0
+        for index, video_file in enumerate(video_files):
+            output_filepath = get_output_filepath(video_file, output_dir, output_format)
+            command = build_ffmpeg_command(
+                video_file,
+                output_filepath,
+                video_codec,
+                audio_codec,
+                video_bitrate,
+                fallback_bitrate,
+                cap_dynamic_bitrate,
+            )
+            
+            log_to_job(db_conn, job_id, f"Converting {os.path.basename(video_file)}...")
+            process = execute_ffmpeg_command(command, verbose_logging)
+            stdout, stderr = process.communicate()
+
+            if process.returncode == 0:
+                completed_count += 1
+                log_to_job(db_conn, job_id, f"Successfully converted {os.path.basename(video_file)}.")
+                if delete_input:
+                    try:
+                        os.remove(video_file)
+                        log_to_job(db_conn, job_id, f"Deleted input file: {video_file}")
+                    except OSError as e:
+                        log_to_job(db_conn, job_id, f"Error deleting file {video_file}: {e}")
+            else:
+                log_to_job(db_conn, job_id, f"ERROR converting {os.path.basename(video_file)}: {stderr}")
+
+            # Update progress after each file
+            progress = (index + 1) / total_files * 100
+            update_job_progress(db_conn, job_id, progress)
+
+        log_to_job(db_conn, job_id, "All files processed.")
+        update_job_status(db_conn, job_id, JobStatus.COMPLETED)
+
+    except Exception as e:
+        log_to_job(db_conn, job_id, f"A critical error occurred: {e}")
+        update_job_status(db_conn, job_id, JobStatus.FAILED)
+    finally:
+        db_conn.close()
