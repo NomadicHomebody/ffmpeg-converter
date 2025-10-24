@@ -6,6 +6,8 @@ import subprocess
 import uuid
 import sqlite3
 from pathlib import Path
+import sys
+from typing import Any
 
 from logging_config import configure_logging
 import database
@@ -109,14 +111,19 @@ def get_job_status(
 def health_check():
     """Performs a health check and returns FFmpeg version."""
     try:
+        # Set up subprocess arguments
+        kwargs: dict[str, Any] = {
+            "capture_output": True,
+            "text": True,
+            "check": True
+        }
+        # Add Windows-specific flag only if on Windows
+        if sys.platform == "win32":
+            kwargs['creationflags'] = subprocess.CREATE_NO_WINDOW
+
         # Execute ffmpeg -version command
-        result = subprocess.run(
-            ["ffmpeg", "-version"],
-            capture_output=True,
-            text=True,
-            check=True,
-            creationflags=subprocess.CREATE_NO_WINDOW # Prevent opening a window on Windows
-        )
+        result = subprocess.run(["ffmpeg", "-version"], **kwargs)
+        
         # The version info is typically in the first line of stdout
         ffmpeg_version = result.stdout.splitlines()[0]
         log.info("Health check successful", ffmpeg_version=ffmpeg_version)

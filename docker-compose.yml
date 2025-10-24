@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  ffmpeg-converter-api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./.testFiles:/videos
+      # - D:\Library\JellyFin:/videos  # Maps a local 'videos' directory to /videos in the container
+      - D:\ffmpeg-converter-api\data:/app/data  # Maps a local 'data' directory to persist the jobs.db database
+    environment:
+      # - API_KEY=${API_KEY} # Reads the API_KEY from the .env file
+      - MAX_CONCURRENT_JOBS=${MAX_CONCURRENT_JOBS}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
