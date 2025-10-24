@@ -2,7 +2,7 @@
 FROM jrottenberg/ffmpeg:4.3-nvidia AS builder
 
 # Stage 2: The Final Application Image
-FROM nvidia/cuda:11.8.0-runtime-ubuntu22.04
+FROM nvidia/cuda:13.0.0-runtime-ubuntu22.04
 
 # Set environment variables
 ENV PYTHONUNBUFFERED 1
