@@ -26,13 +26,13 @@ This document outlines the step-by-step plan to implement the REST API, containe
   - [x] In `api.py`, initialize the FastAPI application.
   - [x] Add a root `GET /` endpoint that returns a welcome message.
 
-- [ ] **2.2: Implement Logging & Correlation ID**
-  - [ ] In a new `logging_config.py`, configure `structlog` for JSON output.
-  - [ ] In `api.py`, add the `asgi-correlation-id` middleware.
-  - [ ] Ensure logs include the correlation ID.
+- [x] **2.2: Implement Logging & Correlation ID**
+  - [x] In a new `logging_config.py`, configure `structlog` for JSON output.
+  - [x] In `api.py`, add the `asgi-correlation-id` middleware.
+  - [x] Ensure logs include the correlation ID.
 
-- [ ] **2.3: Implement Configuration Management**
-  - [ ] In `config.py`, create a Pydantic `Settings` class to load `API_KEY` and `MAX_CONCURRENT_JOBS` from environment variables.
+- [x] **2.3: Implement Configuration Management**
+  - [x] In `config.py`, create a Pydantic `Settings` class to load `API_KEY` and `MAX_CONCURRENT_JOBS` from environment variables.
 
 - [ ] **2.4: Implement Health Check Endpoint**
   - [ ] In `api.py`, create the `GET /health` endpoint.
