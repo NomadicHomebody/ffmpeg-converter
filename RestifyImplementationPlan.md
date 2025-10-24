@@ -8,21 +8,21 @@ This document outlines the step-by-step plan to implement the REST API, containe
   - [x] Add `fastapi`, `uvicorn[standard]`, `structlog`, `asgi-correlation-id`, `pydantic-settings`, and `aiofiles` to `requirements.txt`.
 
 - [x] **1.2: Create New Project Files**
-  - [ ] Create `api.py` for the FastAPI application.
-  - [ ] Create `Dockerfile` for containerization.
-  - [ ] Create `docker-compose.yml` for service orchestration.
-  - [ ] Create `.env` file for local environment variables and add it to `.gitignore`.
-  - [ ] Create `database.py` for SQLite database logic.
-  - [ ] Create `schemas.py` for Pydantic models.
-  - [ ] Create `config.py` for application settings management.
+  - [x] Create `api.py` for the FastAPI application.
+  - [x] Create `Dockerfile` for containerization.
+  - [x] Create `docker-compose.yml` for service orchestration.
+  - [x] Create `.env` file for local environment variables and add it to `.gitignore`.
+  - [x] Create `database.py` for SQLite database logic.
+  - [x] Create `schemas.py` for Pydantic models.
+  - [x] Create `config.py` for application settings management.
 
-- [ ] **1.3: Set Up Local Environment**
-  - [ ] Create and activate a new Python virtual environment.
-  - [ ] Install the updated dependencies: `pip install -r requirements.txt`.
+- [x] **1.3: Set Up Local Environment**
+  - [x] Create and activate a new Python virtual environment.
+  - [x] Install the updated dependencies: `pip install -r requirements.txt`.
 
 ## Phase 2: Core API Scaffolding & Configuration
 
-- [ ] **2.1: Implement Basic FastAPI App**
+- [x] **2.1: Implement Basic FastAPI App**
   - [ ] In `api.py`, initialize the FastAPI application.
   - [ ] Add a root `GET /` endpoint that returns a welcome message.
 
