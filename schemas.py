@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from enum import Enum
 from datetime import datetime
 import uuid
@@ -29,5 +29,4 @@ class Job(JobBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True # Replaces orm_mode in Pydantic v2
+    model_config = ConfigDict(from_attributes=True)

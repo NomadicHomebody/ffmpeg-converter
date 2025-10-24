@@ -57,3 +57,4 @@ test/__pycache__/
 .Python
 .*/
 .env
+.coverage

@@ -92,3 +92,37 @@ curl http://127.0.0.1:8000/health
 ```
 
 You should see a JSON response indicating a `healthy` status and the FFmpeg version.
+
+## 5. Running Automated Tests
+
+The project includes a suite of automated tests to ensure code quality and correctness. The primary testing tool used is `pytest`.
+
+### Prerequisites
+
+Ensure you have activated your virtual environment and installed all dependencies as described in **Section 2**. The testing libraries (`pytest`, `pytest-cov`) are included in `requirements.txt`.
+
+### Running All Tests
+
+To run the entire test suite, execute the following command in your terminal from the project root directory:
+
+```bash
+pytest
+```
+
+Pytest will automatically discover and run all test files (files named `test_*.py` or `*_test.py`).
+
+### Generating a Coverage Report
+
+To check how much of your code is covered by the tests, you can generate a coverage report. This helps identify parts of the application that are not being tested.
+
+Run the following command:
+
+```bash
+# Generate a coverage report for the database module
+pytest --cov=database --cov-report=term-missing
+```
+
+- `--cov=database`: Specifies that we want to measure code coverage for the `database.py` module.
+- `--cov-report=term-missing`: Prints a summary to the terminal, including which lines of code are not covered by tests.
+
+As we add more code and tests (e.g., for `api.py`), you can expand the `--cov` flag to include more modules (e.g., `pytest --cov=database --cov=api`).

@@ -46,17 +46,17 @@ This document outlines the step-by-step plan to implement the REST API, containe
   - [x] In `database.py`, write a function to initialize the SQLite database and create a `jobs` table. The table should store `job_id`, `status`, `progress`, `logs`, `result`, `created_at`, etc.
   - [x] In `schemas.py`, create Pydantic models for `JobCreate`, `Job`, etc.
 
-- [ ] **3.2: Create Database Utility Functions**
-  - [ ] In `database.py`, create CRUD functions:
+- [x] **3.2: Create Database Utility Functions**
+  - [x] In `database.py`, create CRUD functions:
     - `create_job(...)`
     - `get_job(job_id)`
     - `update_job_status(job_id, status)`
     - `update_job_progress(job_id, progress)`
     - `log_to_job(job_id, message)`
 
-- [ ] **3.3: Write Database Tests**
-  - [ ] Create a new `test_database.py` file.
-  - [ ] Write `pytest` unit tests for all CRUD functions to ensure they work correctly.
+- [x] **3.3: Write Database Tests**
+  - [x] Create a new `test_database.py` file.
+  - [x] Write `pytest` unit tests for all CRUD functions to ensure they work correctly.
 
 ## Phase 4: API Endpoint Implementation & Logic
 
